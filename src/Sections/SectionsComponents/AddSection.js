@@ -1,4 +1,4 @@
-export const AddSection = async (e, sections, api, subjectId, chapterId, setSections, navigate) => {
+export const AddSection = async (e, sections, api, subjectId, chapterId, setSections, navigate,classId) => {
     e.preventDefault();
     console.log("sections ready: ", sections);
     try {
@@ -8,7 +8,7 @@ export const AddSection = async (e, sections, api, subjectId, chapterId, setSect
         );
         console.log("response after adding sections: ", res);
         setSections({ sectionName: "", sectionContent: "" });
-        navigate(`/subjects/${subjectId}`);
+        return navigate(`/${classId}/subjects/${subjectId}/chapters`);
     } catch (e) {
         console.error("Error adding section: ", e?.response?.data?.msg);
     }

@@ -4,8 +4,10 @@ import { EditSectionButton } from "./SectionsButtons/EditSectionButton";
 import { DeleteSectionButton } from "./SectionsButtons/DeleteSectionButton";
 
 export default function SectionsList({
+  classId,
+  chapterId,
   sectionsList,
-  _id,
+  subjectId,
   handleDeleteSection,
   setSectionContent,
 }) {
@@ -38,31 +40,39 @@ export default function SectionsList({
   };
   return (
     <div className="border rounded">
-      <h3 className="mb-3 p-2">Sections</h3>
+      <h3 className="mb-3">Sections</h3>
       {sectionsList.length > 0 && (
-        <div className="border rounded ps-2 pb-2">
+        <div className="border rounded">
           {/* <ul className=""> */}
           {sectionsList.map((section) => (
-            <div key={section._id}>
-              <button
-                onClick={() => toggleSection(section._id)}
-                className={`btn my-2 ${
-                  openSectionId === section._id
-                    ? "btn-primary"
-                    : "btn-outline-primary"
-                }`}
-              >
-                {section.section_name}
-              </button>
-              <div className="row rounded" style={{ width: "20rem" }}>
-                <div className="col-md-3">
+            <div
+              key={section._id}
+              className="my-2 d-flex justify-content-between me-2"
+            >
+              <div className="">
+                <span className="me-2">{section?.order}</span>
+                <button
+                  onClick={() => toggleSection(section._id)}
+                  className={`btn ${
+                    openSectionId === section._id
+                      ? "btn-primary"
+                      : "btn-outline-primary"
+                  } text-start`}
+                >
+                  <span className="">{section.section_name}</span>
+                </button>
+              </div>
+              <div className="d-flex">
+                <div className="text-truncate">
                   <EditSectionButton
                     navigate={navigate}
-                    _id={_id}
+                    subjectId={subjectId}
                     section={section}
+                    classId={classId}
+                    chapterId={chapterId}
                   />
                 </div>
-                <div className="col-md-3">
+                <div className=" text-truncate">
                   <DeleteSectionButton
                     handleDeleteSection={handleDeleteSection}
                     section={section}

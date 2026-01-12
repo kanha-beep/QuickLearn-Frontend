@@ -1,14 +1,14 @@
 import React, { useEffect } from "react";
 import { api } from "../../api.js";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { handleChange } from "../Components/HandleChange.js";
 import { UpdateSection } from "./SectionsComponents/UpdateSection.js";
 import { GetSection } from "./SectionsComponents/GetSection.js";
 export default function EditSections() {
+  const [order, setOrder] = React.useState();
   const navigate = useNavigate();
-  const location = useLocation();
-  const { subjectId, chapterId, sectionId } = location.state || {};
-  console.log("EditSections props: ", { subjectId, chapterId, sectionId });
+  const { subjectId, chapterId, sectionId, classId } = useParams();
+  console.log("EditSections props: ", subjectId, chapterId, sectionId);
   const [sectionData, setSectionData] = React.useState({
     sectionName: "",
     sectionContent: "",
@@ -27,7 +27,9 @@ export default function EditSections() {
       chapterId,
       sectionId,
       sectionData,
-      navigate
+      navigate,
+      classId,
+      order
     );
     console.log("section updated");
   };
@@ -35,6 +37,13 @@ export default function EditSections() {
     <div>
       <h1>Edit Sections</h1>
       <form onSubmit={handleContentUpdate}>
+        <input
+          type="number"
+          placeholder="Enter Number"
+          value={order}
+          onChange={(e) => setOrder(e.target.value)}
+          className="form-control"
+        />
         <input
           placeholder="Section Name"
           name="sectionName"

@@ -1,4 +1,4 @@
-export const UpdateSection = async (e, api, subjectId, chapterId, sectionId, sectionData, navigate) => {
+export const UpdateSection = async (e, api, subjectId, chapterId, sectionId, sectionData, navigate, classId, order) => {
     e.preventDefault();
     try {
         const res = await api.patch(
@@ -6,10 +6,11 @@ export const UpdateSection = async (e, api, subjectId, chapterId, sectionId, sec
             {
                 sectionName: sectionData.sectionName,
                 sectionContent: sectionData.sectionContent,
+                order
             }
         );
         console.log("Section updated successfully: ", res?.data);
-        navigate(`/subjects/${subjectId}`);
+        navigate(`/${classId}/subjects/${subjectId}/chapters`);
     } catch (err) {
         console.error("Error updating section: ", err?.response?.data);
     }

@@ -5,9 +5,9 @@ export function DeleteChapterButton({ handleDeleteChapter, chapter }) {
     <div>
       <button
         className="btn btn-outline-danger btn-sm"
-        onClick={() => handleDeleteChapter(chapter._id)}
+        onClick={() => handleDeleteChapter(chapter?._id)}
       >
-        Delete
+        <span className="bi bi-trash fs-7"></span>
       </button>
     </div>
   );

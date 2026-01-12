@@ -6,84 +6,111 @@ import { DeleteChapterButton } from "./ChaptersButtons/DeleteChapterButton.jsx";
 import { DeleteChapter } from "../Chapters/ChaptersComponents/DeleteChapter.js";
 import { api } from "./../../api.js";
 export default function ChapterList({
+  chapterId,
   chaptersList,
   handleSections,
   subjectId,
+  classId,
+  subjectName,
 }) {
+  console.log(
+    "classId: ",
+    classId,
+    "subjectName: ",
+    subjectName,
+    "subjectId: ",
+    // subjectId,
+    "PERMANENT in chapterList"
+  );
+  // console.log("user role in list: ", localStorage.getItem("roles"));
   const navigate = useNavigate();
   const [chapters, setChapters] = useState([]);
+  const [globalChapterId, setGlobalChapterId] = useState("");
+  const [globalChapterName, setGlobalChapterName] = useState("");
   useEffect(() => {
     setChapters(chaptersList);
-  }, [chaptersList]);
-
+  }, [chaptersList, globalChapterId]);
   const handleDeleteChapter = async (chapterId) => {
     console.log("delete started");
-    await DeleteChapter(api, chapterId, setChapters);
+    await DeleteChapter(api, chapterId, classId, subjectId, setChapters);
     console.log("chapter deleted");
+  };
+  const [addButton, setAddButton] = useState("");
+  const [addButtonValue, setAddButtonValue] = useState("");
+  // console.log("chapter ID to pass------:", globalChapterId);
+  console.log("all chapter CHAPTERSLIST: ", chaptersList);
+  console.log(`global chapterId: , ${globalChapterId}`);
+  const moveChapter = (fromIndex, toIndex) => {
+    const updatedChapters = [...chapters];
+    const [movedChapter] = updatedChapters.splice(fromIndex, 1);
+    updatedChapters.splice(toIndex, 0, movedChapter);
+    setChapters(updatedChapters);
   };
   return (
     <div className="border rounded p-2">
-      <h3 className="mb-4">Chapters</h3>
-      {chapters.map((c) => (
-        <div key={c._id} className="border rounded p-1 my-2">
-          <div className="d-flex flex-column gap-2">
-            <div className="">
+      {/* <h3 className="mb-4 text-center">Chapters</h3> */}
+      <div className="d-flex">
+        {chapters.map((c) => (
+          <div key={c._id} className="border rounded p-1 my-2 d-flex">
+            {/* full card */}
+            <div className="col-3">
               <button
                 className="btn btn-primary"
-                onClick={() => handleSections(c._id)}
+                onClick={() => {
+                  console.log(
+                    "Clicking chapter:",
+                    c.chapter_name,
+                    "ID:",
+                    c._id
+                  );
+                  setGlobalChapterId(c?._id);
+                  handleSections(c._id);
+                  setGlobalChapterName(c.chapter_name);
+                }}
               >
                 {c?.chapter_name}
               </button>
             </div>
+
             {/* navigation buttons like edit delete etc */}
-            <div className="row gap-1 rounded" style={{ width: "20rem" }}>
-              <div className="col-md-2">
+            <div className="row rounded" style={{ width: "20rem" }}>
+              <div className="col-3">
                 <EditSingleChapterButton
-                  navigate={navigate}
+                  classId={classId}
+                  chapterId={chapterId}
                   subjectId={subjectId}
+                  navigate={navigate}
                   c={c}
                 />
               </div>
-              <div className="col-md-2">
+              <div className="col-3">
                 <DeleteChapterButton
+                  chapterId={chapterId}
+                  subjectId={subjectId}
                   handleDeleteChapter={handleDeleteChapter}
                   chapter={c}
                 />
               </div>
-              <div className="col-md-2">
+              <div className="col-3">
                 <AddSectionButton
+                  chapterId={chapterId}
+                  addButton={addButton}
+                  setAddButton={setAddButton}
+                  addButtonValue={addButtonValue}
+                  setAddButtonValue={setAddButtonValue}
                   navigate={navigate}
                   c={c}
+                  subjectName={subjectName}
+                  classId={classId}
                   subjectId={subjectId}
+                  globalChapterId={globalChapterId}
+                  globalChapterName={globalChapterName}
                 />
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
-}
-
-{
-  //   const moveChapter = (fromIndex, toIndex) => {
-  //   const updatedChapters = [...chapters];
-  //   const [movedChapter] = updatedChapters.splice(fromIndex, 1);
-  //   updatedChapters.splice(toIndex, 0, movedChapter);
-  //   setChapters(updatedChapters);
-  // };
-  /* <button
-                onClick={() => moveChapter(index, 0)}
-                className="btn btn-outline-info btn-sm"
-                title="Move to top"
-              >
-                ↑
-              </button>
-              <button
-                onClick={() => moveChapter(index, chapters.length - 1)}
-                className="btn btn-outline-info btn-sm"
-                title="Move to bottom"
-              >
-                ↓
-              </button> */
 }

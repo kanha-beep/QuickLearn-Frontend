@@ -10,7 +10,7 @@ export function DeleteSectionButton({ handleDeleteSection, section }) {
           handleDeleteSection(section?.chapter_of_section, section?._id)
         }
       >
-        Delete
+        <span className="bi bi-trash"></span>
       </button>
     </div>
   );

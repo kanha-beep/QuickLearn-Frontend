@@ -15,19 +15,29 @@ import { HomePageButton } from "../Pages/HomePageButton.jsx";
 import { GoToAddChapterButton } from "../Chapters/ChaptersButtons/GoToAddChapterButton.jsx";
 import { SubjectCard } from "./SubjectCard.jsx";
 export default function SubjectPage() {
+  const { chapterId } = useParams();
   const navigate = useNavigate();
-  const { _id } = useParams();
-  // console.log("Subject ID from params working:", _id);
+  const { subjectId } = useParams();
+  const { classId } = useParams();
+  console.log("classId:", classId);
   const [subjectName, setSubjectName] = useState("");
+  // console.log("Subject ID from params working:", _id);
   const [chaptersList, setChaptersList] = useState([]);
   const [chaptersCount, setChapterCount] = useState(0);
   const [sectionContent, setSectionContent] = useState(null);
-
+  const [query, setQuery] = useState("");
   const [openChapterId, setOpenChapterId] = useState(null);
   const [onClickedSectionId, setOnClickedSectionId] = useState(false);
+
   // get chapters
   const getChapters = async () => {
-    GetChapters(api, _id, setChapterCount, setSubjectName, setChaptersList);
+    GetChapters(
+      api,
+      subjectId,
+      setChapterCount,
+      setChaptersList,
+      setSubjectName
+    );
   };
   // get section id to open or close
   const onOpenClose = (sectionId) => {
@@ -37,16 +47,22 @@ export default function SubjectPage() {
   console.log("got section id: ", onClickedSectionId);
   // open all chapters
   useEffect(() => {
-    if (!_id) return;
+    console.log("useEffect triggered with subjectId:", subjectId);
+    if (!subjectId) {
+      console.log("No subjectId, returning early");
+      return;
+    }
     const fetchChapters = async () => {
       try {
+        console.log("About to call getChapters");
         await getChapters();
+        console.log("getChapters completed");
       } catch (err) {
-        console.error(err);
+        console.error("Error in fetchChapters:", err);
       }
     };
     fetchChapters();
-  }, [_id]);
+  }, [subjectId]);
 
   const [sectionsList, setSectionsList] = useState([]);
   // section on off
@@ -57,20 +73,27 @@ export default function SubjectPage() {
       setOpenChapterId,
       setSectionsList,
       api,
-      _id
+      subjectId
     );
   };
   // add section
   const handleAddSections = () => {};
   // edit section
   const handleEditContent = async (chapterId, sectionId) => {
-    EditSection(api, _id, chapterId, sectionId);
+    EditSection(api, subjectId, chapterId, sectionId);
     console.log("section deleted");
   };
   // delete section
   const handleDeleteSection = async (chapterId, sectionId) => {
     console.log("start of deleting section");
-    DeleteSection(api, _id, chapterId, sectionId, getChapters, setSectionsList);
+    DeleteSection(
+      api,
+      subjectId,
+      chapterId,
+      sectionId,
+      getChapters,
+      setSectionsList
+    );
     console.log("section deleted");
   };
   // true or false
@@ -78,25 +101,68 @@ export default function SubjectPage() {
     setOnClickedSectionId(!onClickedSectionId);
     console.log("onClickedSectionId: ", onClickedSectionId);
   };
-  // console.log("selectedChapter: ", onClickedSectionId);
+  const [index, setIndex] = useState(0);
+  const next = () => setIndex((index + 1) % chaptersList.length);
+  const prev = () =>
+    setIndex((index - 1 + chaptersList.length) % chaptersList.length);
+  const filtered = chaptersList.filter((ch) =>
+    ch.chapter_name.toLowerCase().includes(query.toLowerCase())
+  );
+
+  useEffect(() => {
+    setIndex(0);
+  }, [query]);
+
+  const visibleChapter = filtered[index];
   return (
-    <div className="bg-light">
-      <HomePageButton navigate={navigate} />
-      <GoToAddChapterButton navigate={navigate} _id={_id} />
+    <div className="">
       <SubjectCard subjectName={subjectName} chaptersCount={chaptersCount} />
-      <div className="mt-2 rounded border">
+      <div className="my-2">
+        {/* prev next search */}
         <div className="row">
-          <div className="col-sm-6 col-md-6 col-lg-4">
-            <ChapterList
-              handleSections={handleSections}
-              chaptersList={chaptersList}
-              handleAddSections={handleAddSections}
-              subjectId={_id}
+          <div className="col-2">
+            <button className="btn btn-primary" onClick={prev}>
+              Prev
+            </button>
+            <button className="btn btn-primary ms-2" onClick={next}>
+              Next
+            </button>
+          </div>
+          <div className="col-5">
+            <input
+              className="form-control"
+              placeholder="Search chapter"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
             />
           </div>
-          <div className="col-sm-12 col-md-6 col-lg-3">
+          <div className="col-3" style={{ marginLeft: "8rem" }}>
+            <GoToAddChapterButton
+              classId={classId}
+              navigate={navigate}
+              subjectId={subjectId}
+              subjectName={subjectName}
+            />
+          </div>
+        </div>
+        <div className="row my-2">
+          <ChapterList
+            chapterId={chapterId}
+            handleSections={handleSections}
+            // chaptersList={chaptersList}
+            chaptersList={visibleChapter ? [visibleChapter] : []}
+            handleAddSections={handleAddSections}
+            subjectId={subjectId}
+            classId={classId}
+            subjectName={subjectName}
+          />
+        </div>
+        <div className="row">
+          <div className="col-sm-12 col-md-6 col-lg-4" style={{width:"25.5rem"}}>
             <SectionsList
-              _id={_id}
+              classId={classId}
+              subjectId={subjectId}
+              chapterId={chapterId}
               handleEditContent={handleEditContent}
               sectionsList={sectionsList}
               onClickId={onClickId}
@@ -108,17 +174,14 @@ export default function SubjectPage() {
           </div>
           <div className="col-sm-12 col-md-6 col-lg-3">
             <SectionsSummary
-              _id={_id}
-              // handleEditContent={handleEditContent}
+              _id={subjectId}
               sectionsList={sectionsList}
               sectionContent={sectionContent}
-              // onClickId={onClickId}
-              // handleDeleteSection={handleDeleteSection}
-              // onOpenClose={onOpenClose}
             />
           </div>
         </div>
       </div>
+      <HomePageButton navigate={navigate} classId={classId} />
     </div>
   );
 }

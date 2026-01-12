@@ -5,12 +5,17 @@ export const DeleteSection = async (api, _id, chapterId, sectionId, getChapters,
         "from chapter ID:",
         chapterId
     );
-    const res = await api.delete(
-        `/subjects/${_id}/chapters/${chapterId}/sections/${sectionId}/delete`
-    );
-    console.log("Delete response: ", res?.data);
-    getChapters();
-    setSectionsList((prevSections) =>
-        prevSections.filter((section) => section._id !== sectionId)
-    );
+    try {
+        const res = await api.delete(
+            `/subjects/${_id}/chapters/${chapterId}/sections/${sectionId}/delete`
+        );
+        console.log("Delete response: ", res?.data);
+        getChapters();
+        setSectionsList((prevSections) =>
+            prevSections.filter((section) => section._id !== sectionId)
+        )
+    } catch (error) {
+        console.error("Error deleting section:", error?.response?.data?.msg);
+    }
+
 };

@@ -17,16 +17,22 @@ export default function Navbar() {
           <div className="me-5">Your Learning Companion</div>
         </div>
         <div className="bg-light">
-          {/* <button
+          <button
             className="btn btn-outline-danger ms-2"
-            onClick={() => navigate("/add-chapters")}
+            onClick={() => navigate("/auth")}
           >
-            Add Chapters
-          </button> */}
+            Login
+          </button>
+          <button
+            onClick={() => {
+              localStorage.removeItem("tokens");
+              navigate(`/auth`)
+            }}
+          >
+            Logout
+          </button>
         </div>
       </div>
-      <hr />
-      <hr/>
     </nav>
   );
 }
