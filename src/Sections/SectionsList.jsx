@@ -39,30 +39,24 @@ export default function SectionsList({
     }
   };
   return (
-    <div className="border rounded">
-      <h3 className="mb-3">Sections</h3>
+    <div>
       {sectionsList.length > 0 && (
-        <div className="border rounded">
-          {/* <ul className=""> */}
+        <div>
           {sectionsList.map((section) => (
             <div
               key={section._id}
-              className="my-2 d-flex justify-content-between me-2"
+              className="my-2 border rounded-4 p-2"
             >
-              <div className="">
-                <span className="me-2">{section?.order}</span>
+              <div>
                 <button
                   onClick={() => toggleSection(section._id)}
-                  className={`btn ${
-                    openSectionId === section._id
-                      ? "btn-primary"
-                      : "btn-outline-primary"
-                  } text-start`}
+                  className="btn btn-link text-decoration-none text-start w-100 fs-4 fw-semibold p-0 text-dark"
                 >
-                  <span className="">{section.section_name}</span>
+                  <span className="me-3 fs-5 text-secondary">{section?.order}</span>
+                  <span>{section.section_name}</span>
                 </button>
               </div>
-              <div className="d-flex">
+              <div className="d-flex flex-wrap gap-2 mt-2">
                 <div className="text-truncate">
                   <EditSectionButton
                     navigate={navigate}
@@ -72,7 +66,7 @@ export default function SectionsList({
                     chapterId={chapterId}
                   />
                 </div>
-                <div className=" text-truncate">
+                <div className="text-truncate">
                   <DeleteSectionButton
                     handleDeleteSection={handleDeleteSection}
                     section={section}
@@ -81,7 +75,6 @@ export default function SectionsList({
               </div>
             </div>
           ))}
-          {/* </ul> */}
         </div>
       )}
     </div>

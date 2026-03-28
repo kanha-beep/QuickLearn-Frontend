@@ -8,7 +8,7 @@ import AddSections from "./Sections/AddSections.jsx";
 import EditSections from "./Sections/EditSections.jsx";
 import EditChapters from "./Chapters/EditChapters.jsx";
 import ProtectedRoute from "./Pages/ProtectedRoute.jsx";
-import Auth from "./Auth/Auth.jsx";
+import Auth from "./Pages/Auth.jsx";
 import SingleClassPage from "./Pages/SingleClassPage.jsx";
 import AddClass from "./Class/AddClass.jsx";
 import AddSubject from "./Subjects/AddSubject.jsx";

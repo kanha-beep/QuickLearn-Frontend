@@ -47,15 +47,14 @@ export default function ChapterList({
     setChapters(updatedChapters);
   };
   return (
-    <div className="border rounded p-2">
-      {/* <h3 className="mb-4 text-center">Chapters</h3> */}
-      <div className="d-flex">
+    <div className="p-0">
+      <div className="d-flex flex-column">
         {chapters.map((c) => (
-          <div key={c._id} className="border rounded p-1 my-2 d-flex">
+          <div key={c._id} className="border rounded-4 p-2 my-2">
             {/* full card */}
-            <div className="col-3">
+            <div>
               <button
-                className="btn btn-primary"
+                className="btn btn-link text-decoration-none text-start w-100 fs-4 fw-semibold p-0 text-dark"
                 onClick={() => {
                   console.log(
                     "Clicking chapter:",
@@ -68,13 +67,14 @@ export default function ChapterList({
                   setGlobalChapterName(c.chapter_name);
                 }}
               >
+                <span className="me-3 fs-5 text-secondary">{c?.order}</span>
                 {c?.chapter_name}
               </button>
             </div>
 
             {/* navigation buttons like edit delete etc */}
-            <div className="row rounded" style={{ width: "20rem" }}>
-              <div className="col-3">
+            <div className="d-flex flex-wrap gap-2 mt-2">
+              <div>
                 <EditSingleChapterButton
                   classId={classId}
                   chapterId={chapterId}
@@ -83,7 +83,7 @@ export default function ChapterList({
                   c={c}
                 />
               </div>
-              <div className="col-3">
+              <div>
                 <DeleteChapterButton
                   chapterId={chapterId}
                   subjectId={subjectId}
@@ -91,7 +91,7 @@ export default function ChapterList({
                   chapter={c}
                 />
               </div>
-              <div className="col-3">
+              <div>
                 <AddSectionButton
                   chapterId={chapterId}
                   addButton={addButton}
