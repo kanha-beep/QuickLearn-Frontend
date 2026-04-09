@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Navbar from "./Components/Navbar";
 import HomePage from "./Pages/HomePage.jsx";
 import SubjectPage from "./Subjects/SubjectPage.jsx";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import AddChapters from "./Chapters/AddChapters.jsx";
 import AddSections from "./Sections/AddSections.jsx";
 import EditSections from "./Sections/EditSections.jsx";
@@ -32,6 +32,11 @@ function App() {
     setCurrentView("/");
     setSelectedSubject(null);
   };
+
+  const token = localStorage.getItem("token");
+  const hasValidToken = !!token && token !== "undefined" && token !== "null";
+  const fallbackPath = hasValidToken ? "/" : "/auth";
+
   return (
     <div className="" style={{ width: "98%" }}>
       <Navbar onHomeClick={handleBackToHome} />
@@ -118,10 +123,12 @@ function App() {
                   path="/:classId/subjects/:subjectId/chapters/:chapterId/edit"
                   element={<EditChapters />}
                 />
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<Navigate to={fallbackPath} replace />} />
       </Routes>
     </div>
   );
