@@ -5,7 +5,7 @@ export const WrapAsync = (func, setMsg, setMsgType) => {
             if (res?.data?.message && setMsg) setMsg(res?.data?.message)
             if (setMsgType) setMsgType("success")
         } catch (e) {
-            console.log("front error: ", e?.message)
+            console.log("front error: ", e?.response?.msg)
             if (setMsg) setMsg(e?.response?.data?.message || "Something Went Wrong")
             if (setMsgType) setMsgType("danger")
         }

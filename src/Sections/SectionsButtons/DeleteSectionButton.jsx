@@ -6,9 +6,7 @@ export function DeleteSectionButton({ handleDeleteSection, section }) {
       {" "}
       <button
         className="btn btn-outline-danger btn-sm"
-        onClick={() =>
-          handleDeleteSection(section?.chapter_of_section, section?._id)
-        }
+        onClick={() => handleDeleteSection(section?._id)}
       >
         <span className="bi bi-trash"></span>
       </button>

@@ -1,78 +1,84 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { EditSectionButton } from "./SectionsButtons/EditSectionButton";
 import { DeleteSectionButton } from "./SectionsButtons/DeleteSectionButton";
+import { useSections } from "../hooks";
 
 export default function SectionsList({
-  classId,
+  handleDeleteSection,
+  subjectId,
   chapterId,
   sectionsList,
-  subjectId,
-  handleDeleteSection,
   setSectionContent,
+  openSectionId,
+  setOpenSectionId,
+  classId,
 }) {
   const navigate = useNavigate();
-  const [openSectionId, setOpenSectionId] = useState(null);
+  const storedRole = localStorage.getItem("roles");
+  const storedUser = localStorage.getItem("user");
+  const userRole = storedUser ? JSON.parse(storedUser)?.roles : "";
+  const isAdmin = storedRole === "admin" || userRole === "admin";
 
   useEffect(() => {
     setSectionContent(null);
     setOpenSectionId(null);
-  }, [sectionsList]);
+  }, [sectionsList, setSectionContent, setOpenSectionId]);
 
   const toggleSection = (sectionId) => {
     if (openSectionId === sectionId) {
-      // Close if already open
       setOpenSectionId(null);
       setSectionContent(null);
       return;
     }
 
-    // Open new section
     setOpenSectionId(sectionId);
     const section = sectionsList.find((s) => s._id === sectionId);
     if (section) {
-      let formatted = section.section_content
-        .map((s) => s.trim())
-        .join("<br/><br/>");
+      let formatted = section.section_content.map((s) => s.trim()).join("<br/><br/>");
       formatted = formatted.replace(/\d+/g, "<b>$&</b>");
       setSectionContent(formatted);
     }
   };
+
+  const allSections = useSections(subjectId, chapterId);
+
   return (
     <div>
-      {sectionsList.length > 0 && (
+      <h3 className="mb-3">Sections</h3>
+      {allSections.length > 0 && (
         <div>
-          {sectionsList.map((section) => (
-            <div
-              key={section._id}
-              className="my-2 border rounded-4 p-2"
-            >
+          {allSections.map((section) => (
+            <div key={section._id} className="my-2 d-flex justify-content-between me-2">
               <div>
+                <span className="me-2">{section?.order}</span>
                 <button
                   onClick={() => toggleSection(section._id)}
-                  className="btn btn-link text-decoration-none text-start w-100 fs-4 fw-semibold p-0 text-dark"
+                  className={`btn ${
+                    openSectionId === section._id ? "btn-primary" : "btn-outline-primary"
+                  } text-start`}
                 >
-                  <span className="me-3 fs-5 text-secondary">{section?.order}</span>
                   <span>{section.section_name}</span>
                 </button>
               </div>
-              <div className="d-flex flex-wrap gap-2 mt-2">
-                <div className="text-truncate">
-                  <EditSectionButton
-                    navigate={navigate}
-                    subjectId={subjectId}
-                    section={section}
-                    classId={classId}
-                    chapterId={chapterId}
-                  />
+              {isAdmin && (
+                <div className="d-flex">
+                  <div className="text-truncate">
+                    <EditSectionButton
+                      navigate={navigate}
+                      section={section}
+                      subjectId={subjectId}
+                      classId={classId}
+                    />
+                  </div>
+                  <div className="text-truncate">
+                    <DeleteSectionButton
+                      handleDeleteSection={handleDeleteSection}
+                      section={section}
+                    />
+                  </div>
                 </div>
-                <div className="text-truncate">
-                  <DeleteSectionButton
-                    handleDeleteSection={handleDeleteSection}
-                    section={section}
-                  />
-                </div>
-              </div>
+              )}
             </div>
           ))}
         </div>

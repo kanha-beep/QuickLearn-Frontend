@@ -6,7 +6,7 @@ export const EditSection = async (api, _id, chapterId, sectionId) => {
         sectionId
     );
     const res = await api.get(
-        `/subjects/${_id}/chapters/${chapterId}/sections/${sectionId}/edit`
+        `/api/subjects/${_id}/chapters/${chapterId}/sections/${sectionId}/edit`
     );
     console.log("Edit content response: ", res?.data);
 };

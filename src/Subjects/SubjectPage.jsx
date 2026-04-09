@@ -1,446 +1,633 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
-import { api } from "../../api.js";
-import { GetChapters } from "../Chapters/ChaptersComponents/GetChapters.js";
-import { DeleteChapter } from "../Chapters/ChaptersComponents/DeleteChapter.js";
+import { ClipboardCheck } from "lucide-react";
+import { api, apiRoutes } from "../../api.js";
+import { useChapters, useSections } from "../hooks.js";
+import { HomePageButton } from "../Pages/HomePageButton.jsx";
+import { EditSingleChapterButton } from "../Chapters/ChaptersButtons/EditSingleChapterButton.jsx";
+import { DeleteChapterButton } from "../Chapters/ChaptersButtons/DeleteChapterButton.jsx";
+import { AddSectionButton } from "../Sections/SectionsButtons/AddSectionButton.jsx";
+import { GoToAddChapterButton } from "../Chapters/ChaptersButtons/GoToAddChapterButton.jsx";
+import { EditSectionButton } from "../Sections/SectionsButtons/EditSectionButton.jsx";
+import { DeleteSectionButton } from "../Sections/SectionsButtons/DeleteSectionButton.jsx";
+import { DeleteSection } from "../Sections/SectionsComponents/DeleteSection.js";
 
-const formatContent = (content = []) => {
-  if (Array.isArray(content)) return content.filter(Boolean);
-  if (typeof content === "string") {
-    return content
-      .split(/\n|\./)
-      .map((item) => item.trim())
-      .filter(Boolean);
+const buildSubsectionKey = (sectionId, subsection, index) =>
+  subsection?._id || `${sectionId}-${index}`;
+
+const toTextareaValue = (content = []) => {
+  if (Array.isArray(content)) {
+    return content.map((item) => String(item).trim()).filter(Boolean).join("\n");
   }
-  return [];
+
+  return String(content || "");
+};
+
+const toContentArray = (content = "") =>
+  String(content)
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const renderContent = (content = []) => {
+  if (Array.isArray(content)) {
+    return content
+      .map((item) => String(item).trim())
+      .filter(Boolean)
+      .join("<br/><br/>");
+  }
+
+  return String(content || "")
+    .split(/\n|\./)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join("<br/><br/>");
 };
 
 export default function SubjectPage() {
-  const { chapterId, subjectId, classId } = useParams();
   const navigate = useNavigate();
+  const { subjectId, classId } = useParams();
   const [searchParams] = useSearchParams();
-
-  const [subjectName, setSubjectName] = useState("");
-  const [chaptersList, setChaptersList] = useState([]);
-  const [sectionsList, setSectionsList] = useState([]);
-  const [activeChapterId, setActiveChapterId] = useState(chapterId || null);
-  const [activeSectionId, setActiveSectionId] = useState(null);
-  const [activeSubsectionId, setActiveSubsectionId] = useState(null);
-  const [loadingSections, setLoadingSections] = useState(false);
-  const [editingSubsectionId, setEditingSubsectionId] = useState(null);
-  const [subsectionForm, setSubsectionForm] = useState({
-    order: "",
+  const [activeChapterId, setActiveChapterId] = useState("");
+  const [activeSectionId, setActiveSectionId] = useState("");
+  const [activeSubsectionId, setActiveSubsectionId] = useState("");
+  const [editableSections, setEditableSections] = useState([]);
+  const [deletedSectionIds, setDeletedSectionIds] = useState([]);
+  const [editingSubsectionId, setEditingSubsectionId] = useState("");
+  const [subsectionDraft, setSubsectionDraft] = useState({
     subsection_name: "",
     subsection_content: "",
+    order: "",
   });
+  const [isSavingSubsection, setIsSavingSubsection] = useState(false);
+  const [wrongSectionIds, setWrongSectionIds] = useState([]);
+  const [wrongSubsectionIds, setWrongSubsectionIds] = useState([]);
 
+  const { chaptersList, chaptersCount, subjectName } = useChapters(subjectId);
+  const storedRole = localStorage.getItem("roles");
   const storedUser = localStorage.getItem("user");
-  const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-  const isAdmin =
-    localStorage.getItem("roles") === "admin" || parsedUser?.roles === "admin";
+  const userRole = storedUser ? JSON.parse(storedUser)?.roles : "";
+  const isAdmin = storedRole === "admin" || userRole === "admin";
+  const query = (searchParams.get("q") || "").trim().toLowerCase();
+
+  const filteredChapters = chaptersList.filter((chapter) =>
+    chapter?.chapter_name?.toLowerCase().includes(query),
+  );
 
   useEffect(() => {
-    GetChapters(api, subjectId, () => {}, setChaptersList, setSubjectName);
-  }, [subjectId]);
-
-  useEffect(() => {
-    if (!chapterId) return;
-    handleChapterToggle(chapterId);
-  }, [chapterId]);
-
-  const normalizedQuery = (searchParams.get("q") || "").trim().toLowerCase();
-  const filteredChapters = useMemo(() => {
-    return chaptersList.filter((chapter) => {
-      const chapterName = (chapter?.chapter_name ?? "").toString().toLowerCase();
-      const order = (chapter?.order ?? "").toString().toLowerCase();
-      return chapterName.includes(normalizedQuery) || order.includes(normalizedQuery);
-    });
-  }, [chaptersList, normalizedQuery]);
-
-  const activeSection = sectionsList.find((section) => section._id === activeSectionId) || null;
-  const subsections = activeSection?.subsections || [];
-  const activeSubsection =
-    subsections.find((subsection) => String(subsection._id || subsection.order) === activeSubsectionId) || null;
-
-  async function handleChapterToggle(nextChapterId) {
-    if (activeChapterId === nextChapterId) {
-      setActiveChapterId(null);
-      setSectionsList([]);
-      setActiveSectionId(null);
-      setActiveSubsectionId(null);
-      setEditingSubsectionId(null);
+    if (!filteredChapters.length) {
+      setActiveChapterId("");
+      setWrongSectionIds([]);
+      setWrongSubsectionIds([]);
       return;
     }
 
-    try {
-      setLoadingSections(true);
-      const res = await api.get(`/subjects/${subjectId}/chapters/${nextChapterId}/sections`);
-      setSectionsList(res?.data?.sections || []);
-      setActiveChapterId(nextChapterId);
-      setActiveSectionId(null);
-      setActiveSubsectionId(null);
-      setEditingSubsectionId(null);
-    } catch (error) {
-      console.log("error in sections: ", error?.response?.data);
-      setSectionsList([]);
-    } finally {
-      setLoadingSections(false);
-    }
-  }
-
-  function handleSectionToggle(section) {
-    if (activeSectionId === section._id) {
-      setActiveSectionId(null);
-      setActiveSubsectionId(null);
-      setEditingSubsectionId(null);
-      return;
-    }
-
-    setActiveSectionId(section._id);
-    setActiveSubsectionId(null);
-    setEditingSubsectionId(null);
-  }
-
-  function handleSubsectionToggle(subsection) {
-    const subsectionKey = String(subsection._id || subsection.order);
-    if (activeSubsectionId === subsectionKey) {
-      setActiveSubsectionId(null);
-      setEditingSubsectionId(null);
-      return;
-    }
-
-    setActiveSubsectionId(subsectionKey);
-    setEditingSubsectionId(null);
-  }
-
-  const handleDeleteChapter = async (id) => {
-    await DeleteChapter(api, id, classId, subjectId, setChaptersList);
-    if (activeChapterId === id) {
-      setActiveChapterId(null);
-      setSectionsList([]);
-      setActiveSectionId(null);
-      setActiveSubsectionId(null);
-    }
-  };
-
-  const handleDeleteSection = async (section) => {
-    try {
-      await api.delete(`/subjects/${subjectId}/chapters/${section.chapter_of_section}/sections/${section._id}/delete`);
-      setSectionsList((prev) => prev.filter((item) => item._id !== section._id));
-      if (activeSectionId === section._id) {
-        setActiveSectionId(null);
-        setActiveSubsectionId(null);
-      }
-    } catch (error) {
-      console.log("error deleting section: ", error?.response?.data?.msg);
-    }
-  };
-
-  const startSubsectionEdit = (subsection) => {
-    setEditingSubsectionId(String(subsection._id || subsection.order));
-    setSubsectionForm({
-      order: subsection?.order ?? "",
-      subsection_name: subsection?.subsection_name ?? "",
-      subsection_content: formatContent(subsection?.subsection_content).join("\n"),
-    });
-  };
-
-  const handleDeleteSubsection = async (subsection) => {
-    if (!activeSection) return;
-
-    const nextSubsections = (activeSection.subsections || []).filter(
-      (item) => String(item._id || item.order) !== String(subsection._id || subsection.order)
+    const activeStillExists = filteredChapters.some(
+      (chapter) => chapter._id === activeChapterId,
     );
 
+    if (activeChapterId && !activeStillExists) {
+      setActiveChapterId("");
+    }
+  }, [filteredChapters, activeChapterId]);
+
+  const sections = useSections(subjectId, activeChapterId);
+  useEffect(() => {
+    setEditableSections(sections);
+  }, [sections]);
+
+  useEffect(() => {
+    if (!activeChapterId) {
+      setWrongSectionIds([]);
+      setWrongSubsectionIds([]);
+      return;
+    }
+
+    const loadChapterStatus = async () => {
+      try {
+        const res = await api.get(apiRoutes.chapterHighlights(subjectId, activeChapterId));
+        setWrongSectionIds(res?.data?.wrongSectionIds || []);
+        setWrongSubsectionIds(res?.data?.wrongSubsectionIds || []);
+      } catch (error) {
+        console.log("error loading chapter status: ", error?.response?.data?.msg || error.message);
+        setWrongSectionIds([]);
+        setWrongSubsectionIds([]);
+      }
+    };
+
+    loadChapterStatus();
+  }, [subjectId, activeChapterId]);
+
+  const visibleSections = useMemo(
+    () => editableSections.filter((section) => !deletedSectionIds.includes(section._id)),
+    [editableSections, deletedSectionIds],
+  );
+
+  useEffect(() => {
+    if (!visibleSections.length) {
+      setActiveSectionId("");
+      setActiveSubsectionId("");
+      return;
+    }
+
+    const activeStillExists = visibleSections.some(
+      (section) => section._id === activeSectionId,
+    );
+
+    if (activeSectionId && !activeStillExists) {
+      setActiveSectionId("");
+      setActiveSubsectionId("");
+    }
+  }, [visibleSections, activeSectionId]);
+
+  const selectedSection =
+    visibleSections.find((section) => section._id === activeSectionId) || null;
+  const sectionSubsections = selectedSection?.subsections || [];
+
+  useEffect(() => {
+    if (!sectionSubsections.length) {
+      setActiveSubsectionId("");
+      setEditingSubsectionId("");
+      return;
+    }
+
+    const activeStillExists = sectionSubsections.some(
+      (subsection, index) =>
+        (subsection._id || `${selectedSection?._id}-${index}`) === activeSubsectionId,
+    );
+
+    if (activeSubsectionId && !activeStillExists) {
+      setActiveSubsectionId("");
+      setEditingSubsectionId("");
+    }
+  }, [sectionSubsections, activeSubsectionId, selectedSection]);
+
+  const selectedSubsection =
+    sectionSubsections.find(
+      (subsection, index) =>
+        (subsection._id || `${selectedSection?._id}-${index}`) === activeSubsectionId,
+    ) || null;
+  const hasSubsections = sectionSubsections.length > 0;
+  const layoutClass = "grid-cols-2 lg:grid-cols-4";
+  const actionRowClass = "mt-2 flex flex-wrap items-center gap-2";
+
+  const handleDeleteSection = async (sectionId) => {
+    const section = visibleSections.find((item) => item._id === sectionId);
+    if (!sectionId || !section?.chapter_of_section) return;
+
+    await DeleteSection(
+      api,
+      subjectId,
+      section.chapter_of_section,
+      sectionId,
+      (prevSections = []) => prevSections.filter((item) => item._id !== sectionId),
+    );
+    setDeletedSectionIds((prev) => [...prev, sectionId]);
+  };
+
+  const startEditSubsection = (subsection, index) => {
+    if (!selectedSection) return;
+
+    const subsectionKey = buildSubsectionKey(selectedSection._id, subsection, index);
+    setActiveSubsectionId(subsectionKey);
+    setEditingSubsectionId(subsectionKey);
+    setSubsectionDraft({
+      subsection_name: subsection?.subsection_name || "",
+      subsection_content: toTextareaValue(subsection?.subsection_content),
+      order: subsection?.order ?? "",
+    });
+  };
+
+  const resetSubsectionEditor = () => {
+    setEditingSubsectionId("");
+    setSubsectionDraft({
+      subsection_name: "",
+      subsection_content: "",
+      order: "",
+    });
+  };
+
+  const saveSubsectionsForSection = async (updatedSubsections) => {
+    if (!selectedSection || !activeChapterId) return false;
+
+    setIsSavingSubsection(true);
     try {
-      const res = await api.patch(
-        `/subjects/${subjectId}/chapters/${activeSection.chapter_of_section}/sections/${activeSection._id}/edit`,
+      await api.patch(
+        `/api/subjects/${subjectId}/chapters/${activeChapterId}/sections/${selectedSection._id}/edit`,
         {
-          sectionName: activeSection.section_name,
-          sectionContent: activeSection.section_content,
-          order: activeSection.order,
-          subsections: nextSubsections,
-        }
+          sectionName: selectedSection.section_name,
+          sectionContent: selectedSection.section_content,
+          order: selectedSection.order,
+          subsections: updatedSubsections,
+        },
       );
 
-      const updatedSection = res?.data?.section;
-      setSectionsList((prev) =>
-        prev.map((section) => (section._id === updatedSection._id ? updatedSection : section))
+      setEditableSections((prevSections) =>
+        prevSections.map((section) =>
+          section._id === selectedSection._id
+            ? { ...section, subsections: updatedSubsections }
+            : section,
+        ),
       );
-      setActiveSubsectionId(null);
-      setEditingSubsectionId(null);
+      return true;
     } catch (error) {
-      console.log("error deleting subsection: ", error?.response?.data?.msg);
+      console.error("Error updating subsections: ", error?.response?.data || error);
+      return false;
+    } finally {
+      setIsSavingSubsection(false);
     }
   };
 
-  const handleSaveSubsection = async (event) => {
-    event.preventDefault();
-    if (!activeSection || !editingSubsectionId) return;
+  const handleSaveSubsection = async () => {
+    if (!selectedSection || !editingSubsectionId) return;
 
-    const nextSubsections = (activeSection.subsections || []).map((subsection) => {
-      const subsectionKey = String(subsection._id || subsection.order);
-      if (subsectionKey !== editingSubsectionId) return subsection;
+    const updatedSubsections = sectionSubsections.map((subsection, index) => {
+      const subsectionKey = buildSubsectionKey(selectedSection._id, subsection, index);
+      if (subsectionKey !== editingSubsectionId) {
+        return subsection;
+      }
 
       return {
         ...subsection,
-        order: subsectionForm.order,
-        subsection_name: subsectionForm.subsection_name,
-        subsection_content: subsectionForm.subsection_content,
+        subsection_name: subsectionDraft.subsection_name.trim(),
+        subsection_content: toContentArray(subsectionDraft.subsection_content),
+        order: subsectionDraft.order,
       };
     });
 
-    try {
-      const res = await api.patch(
-        `/subjects/${subjectId}/chapters/${activeSection.chapter_of_section}/sections/${activeSection._id}/edit`,
-        {
-          sectionName: activeSection.section_name,
-          sectionContent: activeSection.section_content,
-          order: activeSection.order,
-          subsections: nextSubsections,
-        }
-      );
-
-      const updatedSection = res?.data?.section;
-      setSectionsList((prev) =>
-        prev.map((section) => (section._id === updatedSection._id ? updatedSection : section))
-      );
-      setEditingSubsectionId(null);
-    } catch (error) {
-      console.log("error saving subsection: ", error?.response?.data?.msg);
+    const saved = await saveSubsectionsForSection(updatedSubsections);
+    if (saved) {
+      resetSubsectionEditor();
     }
   };
 
-  const explanationParagraphs = activeSubsection
-    ? formatContent(activeSubsection?.subsection_content)
-    : activeSection && subsections.length === 0
-    ? formatContent(activeSection?.section_content)
-    : [];
+  const handleDeleteSubsection = async (subsectionKeyToDelete) => {
+    if (!selectedSection) return;
+
+    const updatedSubsections = sectionSubsections.filter((subsection, index) => {
+      const subsectionKey = buildSubsectionKey(selectedSection._id, subsection, index);
+      return subsectionKey !== subsectionKeyToDelete;
+    });
+
+    const saved = await saveSubsectionsForSection(updatedSubsections);
+    if (!saved) return;
+
+    if (activeSubsectionId === subsectionKeyToDelete) {
+      setActiveSubsectionId("");
+    }
+    if (editingSubsectionId === subsectionKeyToDelete) {
+      resetSubsectionEditor();
+    }
+  };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-1 pb-4 pt-3 text-slate-900">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <div className="rounded-4 border bg-white p-3 shadow-sm">
-          <h3 className="mb-3 text-2xl fw-semibold">Chapters</h3>
-          <div className="max-h-[11rem] overflow-y-auto pr-1 lg:max-h-none lg:overflow-visible lg:pr-0">
-            <div className="d-flex flex-column">
-              {filteredChapters.map((chapter) => (
-                <div key={chapter._id} className="my-2 rounded-4 border p-2">
+      {isAdmin && (
+        <div className="mb-3 flex justify-end">
+          <GoToAddChapterButton
+            navigate={navigate}
+            subjectId={subjectId}
+            classId={classId}
+            subjectName={subjectName}
+          />
+        </div>
+      )}
+
+      <section className={`grid gap-3 ${layoutClass}`}>
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+          <div className="mb-3 text-sm font-semibold text-slate-700">Chapters</div>
+          <div className="max-h-[11rem] space-y-2 overflow-y-auto pr-1 lg:max-h-none lg:overflow-visible lg:pr-0">
+            {filteredChapters.map((chapter) => {
+              const isActive = activeChapterId === chapter._id;
+              return (
+                <div
+                  key={chapter._id}
+                  className={`rounded-xl border p-2 transition ${
+                    isActive
+                      ? "border-cyan-300 bg-cyan-50"
+                      : "border-slate-200 bg-white hover:border-slate-300"
+                  }`}
+                >
                   <button
-                    className="btn btn-link w-100 p-0 text-start text-decoration-none text-dark"
-                    onClick={() => handleChapterToggle(chapter._id)}
+                    type="button"
+                    onClick={() => {
+                      if (activeChapterId === chapter._id) {
+                        setActiveChapterId("");
+                        setActiveSectionId("");
+                        setActiveSubsectionId("");
+                        return;
+                      }
+
+                      setActiveChapterId(chapter._id);
+                      setActiveSectionId("");
+                      setActiveSubsectionId("");
+                    }}
+                    className="w-full break-words text-left text-base font-semibold text-slate-800"
                   >
-                    <div className="d-flex align-items-start gap-3">
-                      <span className="w-6 text-secondary fs-5">{chapter?.order}</span>
-                      <span className="fs-4 fw-semibold">{chapter?.chapter_name}</span>
-                    </div>
+                    <span className="inline-flex w-8 shrink-0 text-xs text-slate-500 sm:mr-5">
+                      {chapter.order}
+                    </span>
+                    {chapter.chapter_name}
                   </button>
 
-                  {isAdmin && (
-                    <div className="mt-2 d-flex flex-wrap gap-2">
+                  {isAdmin && isActive && (
+                    <div className={actionRowClass}>
+                      <EditSingleChapterButton
+                        navigate={navigate}
+                        subjectId={subjectId}
+                        classId={classId}
+                        chapter={chapter}
+                      />
+                      <DeleteChapterButton chapter={chapter} subjectId={subjectId} />
+                      <AddSectionButton
+                        navigate={navigate}
+                        c={chapter}
+                        classId={classId}
+                        subjectId={subjectId}
+                        subjectName={subjectName}
+                      />
+                    </div>
+                  )}
+
+                  {isActive && (
+                    <div className={`${actionRowClass} ${isAdmin ? "" : "mt-3"}`}>
                       <button
-                        className="btn btn-outline-success btn-sm"
+                        type="button"
                         onClick={() =>
-                          navigate(`/${classId}/subjects/${subjectId}/chapters/${chapter._id}/edit`, {
+                          navigate(`/${classId}/subjects/${subjectId}/chapters/${chapter._id}/test`, {
                             state: {
-                              subjectId,
-                              chapterId: chapter._id,
-                              chapterN: chapter.chapter_name,
+                              chapterName: chapter.chapter_name,
+                              autostart: true,
                             },
                           })
                         }
+                        className="btn btn-sm btn-outline-dark"
                       >
-                        <Pencil size={14} />
+                        <span className="inline-flex items-center gap-2">
+                          <ClipboardCheck size={14} />
+                          <span>Test</span>
+                        </span>
                       </button>
-                      <button
-                        className="btn btn-outline-danger btn-sm"
-                        onClick={() => handleDeleteChapter(chapter._id)}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                      <select
-                        className="form-select form-select-sm w-auto"
-                        defaultValue=""
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          event.target.value = "";
-                          if (!value) return;
-                          navigate(`/${classId}/${subjectId}/${chapter._id}/add-sections`, {
-                            state: {
-                              addButton: value,
-                              chapterId: chapter._id,
-                              chapterName: chapter.chapter_name,
-                              subjectId,
-                              classId,
-                              subjectName,
-                            },
-                          });
-                        }}
-                      >
-                        <option value="">Add</option>
-                        <option value="sections">Section</option>
-                        <option value="meanings">Meanings</option>
-                      </select>
                     </div>
                   )}
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
 
-        <div className="rounded-4 border bg-white p-3 shadow-sm">
-          <h3 className="mb-3 text-2xl fw-semibold">Sections</h3>
-          <div className="max-h-[11rem] overflow-y-auto pr-1 lg:max-h-none lg:overflow-visible lg:pr-0">
-            {loadingSections ? (
-              <p className="text-sm text-slate-500">Loading sections...</p>
-            ) : (
-              <div>
-                {sectionsList.map((section) => (
-                  <div key={section._id} className="my-2 rounded-4 border p-2">
-                    <button
-                      onClick={() => handleSectionToggle(section)}
-                      className="btn btn-link w-100 p-0 text-start text-decoration-none text-dark"
-                    >
-                      <div className="d-flex align-items-start gap-3">
-                        <span className="w-6 text-secondary fs-5">{section?.order}</span>
-                        <span className="fs-4 fw-semibold">{section.section_name}</span>
-                      </div>
-                    </button>
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+          <div className="mb-3 text-sm font-semibold text-slate-700">Sections</div>
+          <div className="max-h-[11rem] space-y-2 overflow-y-auto pr-1 lg:max-h-none lg:overflow-visible lg:pr-0">
+            {visibleSections.map((section) => {
+              const isActive = activeSectionId === section._id;
+              return (
+                <div
+                  key={section._id}
+                  className={`rounded-xl border p-2 transition ${
+                    wrongSectionIds.includes(section._id)
+                      ? "border-rose-300 bg-rose-50"
+                      : isActive
+                      ? "border-emerald-300 bg-emerald-50"
+                      : "border-slate-200 bg-white hover:border-slate-300"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (activeSectionId === section._id) {
+                        setActiveSectionId("");
+                        setActiveSubsectionId("");
+                        return;
+                      }
 
-                    {isAdmin && (
-                      <div className="mt-2 d-flex flex-wrap gap-2">
-                        <button
-                          className="btn btn-outline-secondary btn-sm"
-                          onClick={() =>
-                            navigate(
-                              `/${classId}/subjects/${subjectId}/chapters/${section.chapter_of_section}/sections/${section._id}/edit`,
-                              {
-                                state: {
-                                  subjectId,
-                                  chapterId: section.chapter_of_section,
-                                  sectionId: section._id,
-                                },
-                              }
-                            )
-                          }
-                        >
-                          <Pencil size={14} />
-                        </button>
-                        <button
-                          className="btn btn-outline-danger btn-sm"
-                          onClick={() => handleDeleteSection(section)}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                      setActiveSectionId(section._id);
+                      setActiveSubsectionId("");
+                    }}
+                    className="w-full break-words text-left text-base font-semibold text-slate-800"
+                  >
+                    <span className="inline-flex w-8 shrink-0 text-xs text-slate-500">
+                      {section.order}
+                    </span>
+                    {section.section_name}
+                  </button>
+
+                  {isAdmin && isActive && (
+                    <div className={actionRowClass}>
+                      <EditSectionButton
+                        navigate={navigate}
+                        section={section}
+                        subjectId={subjectId}
+                        classId={classId}
+                      />
+                      <DeleteSectionButton
+                        handleDeleteSection={handleDeleteSection}
+                        section={section}
+                      />
+                    </div>
+                  )}
+
+                  {wrongSectionIds.includes(section._id) && (
+                    <p className="mt-2 mb-0 text-xs font-semibold text-rose-700">
+                      Revise this section. You answered it wrong in your last test.
+                    </p>
+                  )}
+
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        <div className="rounded-4 border bg-white p-3 shadow-sm">
-          <h3 className="mb-3 text-2xl fw-semibold">Subsections</h3>
-          <div className="max-h-[20rem] overflow-y-auto pr-1 lg:max-h-none lg:overflow-visible lg:pr-0">
-            {!activeSection ? (
-              <p className="text-sm text-slate-500">Select a section to view subsections.</p>
-            ) : subsections.length === 0 ? (
-              <p className="text-sm text-slate-500">No subsections inside this section.</p>
-            ) : (
-              <div>
-                {subsections.map((subsection) => {
-                  const subsectionKey = String(subsection._id || subsection.order);
-                  const isEditing = editingSubsectionId === subsectionKey;
+        {selectedSection && hasSubsections ? (
+          <>
+            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div className="mb-3 text-sm font-semibold text-slate-700">Subsections</div>
+              <div className="max-h-[20rem] space-y-2 overflow-y-auto pr-1 lg:max-h-none lg:overflow-visible lg:pr-0">
+                {sectionSubsections.map((subsection, index) => {
+                  const subsectionKey =
+                    buildSubsectionKey(selectedSection._id, subsection, index);
+                  const isActive = activeSubsectionId === subsectionKey;
+
                   return (
-                    <div key={subsectionKey} className="my-2 rounded-4 border p-2">
+                    <div
+                      key={subsectionKey}
+                      className={`w-full rounded-xl border p-2 text-left text-base font-semibold transition ${
+                        wrongSubsectionIds.includes(subsectionKey)
+                          ? "border-rose-300 bg-rose-50 text-rose-900"
+                          : isActive
+                          ? "border-amber-300 bg-amber-50 text-amber-900"
+                          : "border-slate-200 bg-white text-slate-800 hover:border-slate-300"
+                      }`}
+                    >
                       <button
-                        onClick={() => handleSubsectionToggle(subsection)}
-                        className="btn btn-link w-100 p-0 text-start text-decoration-none text-dark"
+                        type="button"
+                        onClick={() => {
+                          if (activeSubsectionId === subsectionKey) {
+                            setActiveSubsectionId("");
+                            return;
+                          }
+
+                          setActiveSubsectionId(subsectionKey);
+                        }}
+                        className="w-full text-left break-words"
                       >
-                        <div className="d-flex align-items-start gap-3">
-                          <span className="w-6 text-secondary fs-5">{subsection?.order}</span>
-                          <span className="fs-4 fw-semibold">{subsection?.subsection_name}</span>
-                        </div>
+                        <span className="inline-flex w-8 shrink-0 text-xs text-slate-500">
+                          {subsection.order ?? index}
+                        </span>
+                        {subsection.subsection_name}
                       </button>
 
-                      {isAdmin && (
-                        <div className="mt-2 d-flex flex-wrap gap-2">
-                          <button className="btn btn-outline-secondary btn-sm" onClick={() => startSubsectionEdit(subsection)}>
-                            <Pencil size={14} />
+                      {isAdmin && isActive && (
+                        <div className={actionRowClass}>
+                          <button
+                            type="button"
+                            onClick={() => startEditSubsection(subsection, index)}
+                            className="btn btn-sm btn-outline-primary"
+                          >
+                            Edit
                           </button>
-                          <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteSubsection(subsection)}>
-                            <Trash2 size={14} />
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSubsection(subsectionKey)}
+                            className="btn btn-sm btn-outline-danger"
+                            disabled={isSavingSubsection}
+                          >
+                            Delete
                           </button>
                         </div>
                       )}
 
-                      {isEditing && (
-                        <form onSubmit={handleSaveSubsection} className="mt-3 space-y-2">
-                          <input
-                            className="form-control form-control-sm"
-                            value={subsectionForm.order}
-                            onChange={(event) => setSubsectionForm((prev) => ({ ...prev, order: event.target.value }))}
-                            placeholder="Order"
-                          />
-                          <input
-                            className="form-control form-control-sm"
-                            value={subsectionForm.subsection_name}
-                            onChange={(event) => setSubsectionForm((prev) => ({ ...prev, subsection_name: event.target.value }))}
-                            placeholder="Subsection name"
-                          />
-                          <textarea
-                            className="form-control form-control-sm"
-                            rows={4}
-                            value={subsectionForm.subsection_content}
-                            onChange={(event) => setSubsectionForm((prev) => ({ ...prev, subsection_content: event.target.value }))}
-                            placeholder="Subsection content"
-                          />
-                          <div className="d-flex gap-2">
-                            <button type="submit" className="btn btn-dark btn-sm">Save</button>
-                            <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setEditingSubsectionId(null)}>
-                              Cancel
-                            </button>
-                          </div>
-                        </form>
+                      {wrongSubsectionIds.includes(subsectionKey) && (
+                        <p className="mt-2 mb-0 text-xs font-semibold text-rose-700">
+                          Revise this subsection. You answered it wrong in your last test.
+                        </p>
                       )}
+
                     </div>
                   );
                 })}
               </div>
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-4 border bg-white p-3 shadow-sm">
-          <h3 className="mb-3 text-2xl fw-semibold">Explanation</h3>
-          {!activeSection ? (
-            <p className="text-sm text-slate-500">Select a section to read its explanation.</p>
-          ) : subsections.length > 0 && !activeSubsection ? (
-            <p className="text-sm text-slate-500">Select a subsection to read its explanation.</p>
-          ) : explanationParagraphs.length === 0 ? (
-            <p className="text-sm text-slate-500">No explanation available.</p>
-          ) : (
-            <div className="space-y-3 text-sm leading-7 text-slate-700">
-              {explanationParagraphs.map((item, index) => (
-                <p key={`${index}-${item.slice(0, 12)}`}>{item}</p>
-              ))}
             </div>
-          )}
-        </div>
-      </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div className="text-sm font-semibold text-slate-700">Explanation</div>
+                {isAdmin && editingSubsectionId && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={resetSubsectionEditor}
+                      className="btn btn-sm btn-outline-secondary"
+                      disabled={isSavingSubsection}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveSubsection}
+                      className="btn btn-sm btn-success"
+                      disabled={isSavingSubsection}
+                    >
+                      {isSavingSubsection ? "Saving..." : "Save"}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {isAdmin && editingSubsectionId ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">
+                      Order
+                    </label>
+                    <input
+                      type="number"
+                      value={subsectionDraft.order}
+                      onChange={(e) =>
+                        setSubsectionDraft((prev) => ({ ...prev, order: e.target.value }))
+                      }
+                      className="form-control form-control-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">
+                      Subsection Name
+                    </label>
+                    <input
+                      type="text"
+                      value={subsectionDraft.subsection_name}
+                      onChange={(e) =>
+                        setSubsectionDraft((prev) => ({
+                          ...prev,
+                          subsection_name: e.target.value,
+                        }))
+                      }
+                      className="form-control form-control-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">
+                      Subsection Content
+                    </label>
+                    <textarea
+                      rows="5"
+                      value={subsectionDraft.subsection_content}
+                      onChange={(e) =>
+                        setSubsectionDraft((prev) => ({
+                          ...prev,
+                          subsection_content: e.target.value,
+                        }))
+                      }
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+              ) : (
+                selectedSubsection ? (
+                  <div
+                    className="prose prose-sm max-w-none text-sm text-slate-700"
+                    dangerouslySetInnerHTML={{
+                      __html: renderContent(selectedSubsection.subsection_content),
+                    }}
+                  />
+                ) : (
+                  <p className="text-sm text-slate-500">
+                    Select a subsection to read its explanation.
+                  </p>
+                )
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div className="mb-3 text-sm font-semibold text-slate-700">Subsections</div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div className="mb-3 text-sm font-semibold text-slate-700">
+                Explanation
+              </div>
+              {selectedSection ? (
+                <div
+                  className="prose prose-sm max-w-none text-sm text-slate-700"
+                  dangerouslySetInnerHTML={{
+                    __html: renderContent(selectedSection.section_content),
+                  }}
+                />
+              ) : (
+                <p className="text-sm text-slate-500">
+                  Select a section to read its explanation.
+                </p>
+              )}
+            </div>
+          </>
+        )}
+      </section>
 
       <div className="mt-4">
-        <button
-          onClick={() => navigate(`/${classId}`)}
-          className="btn btn-outline-secondary flex items-center gap-2"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          <span>Back to Subjects</span>
-        </button>
+        <HomePageButton navigate={navigate} classId={classId} />
       </div>
     </div>
   );

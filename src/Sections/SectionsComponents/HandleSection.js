@@ -1,15 +1,14 @@
 export const HandleSections = async (openChapterId, chapterId, setOpenChapterId, setSectionsList, api, _id) => {
     try {
-        console.log("HandleSections ----- chapterId:", chapterId);
-        console.log("Current openChapterId:", openChapterId);
-
+        console.log("chapterId:", chapterId);
+        console.log("Current ChapterId:", openChapterId);
         if (openChapterId === chapterId) {
             setOpenChapterId(null); // close
             setSectionsList([]); // clear
             return;
         }
         
-        const url = `/subjects/${_id}/chapters/${chapterId}/sections`;
+        const url = `/api/subjects/${_id}/chapters/${chapterId}/sections`;
         console.log("Making API call to:", url);
         
         const res = await api.get(url);

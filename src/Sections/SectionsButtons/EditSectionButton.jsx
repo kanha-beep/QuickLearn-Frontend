@@ -1,6 +1,6 @@
 import React from "react";
 
-export function EditSectionButton({ navigate, subjectId, section, classId }) {
+export function EditSectionButton({ navigate, section, subjectId, classId }) {
   return (
     <div>
       <button
@@ -9,11 +9,11 @@ export function EditSectionButton({ navigate, subjectId, section, classId }) {
             `/${classId}/subjects/${subjectId}/chapters/${section?.chapter_of_section}/sections/${section?._id}/edit`,
             {
               state: {
-                subjectId: subjectId,
+                subjectId,
                 chapterId: section?.chapter_of_section,
                 sectionId: section?._id,
               },
-            }
+            },
           )
         }
         className="btn btn-outline-secondary btn-sm me-2"

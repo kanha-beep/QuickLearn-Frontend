@@ -1,14 +1,11 @@
 export default function SectionsSummary({ sectionsList, sectionContent }) {
-  // console.log(" in ChapterSummary: ", sectionsList);
   return (
     <div>
+      <h3 className="">Summary</h3>
       {sectionsList.length > 0 && (
-        <div>
+        <div className="mt-2 bg-lime-50/20">
           {sectionContent && (
-            <div
-              className="mt-1"
-              dangerouslySetInnerHTML={{ __html: sectionContent }}
-            />
+            <div className="mt-3" dangerouslySetInnerHTML={{ __html: sectionContent }} />
           )}
         </div>
       )}

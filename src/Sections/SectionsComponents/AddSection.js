@@ -3,11 +3,11 @@ export const AddSection = async (e, sections, api, subjectId, chapterId, setSect
     console.log("sections ready: ", sections);
     try {
         const res = await api.post(
-            `/subjects/${subjectId}/chapters/${chapterId}/sections/add-section`,
+            `/api/subjects/${subjectId}/chapters/${chapterId}/sections/add-section`,
             sections
         );
         console.log("response after adding sections: ", res);
-        setSections({ sectionName: "", sectionContent: "" });
+        setSections({ sectionName: "", sectionContent: "", order: "", subsections: [] });
         return navigate(`/${classId}/subjects/${subjectId}/chapters`);
     } catch (e) {
         console.error("Error adding section: ", e?.response?.data?.msg);

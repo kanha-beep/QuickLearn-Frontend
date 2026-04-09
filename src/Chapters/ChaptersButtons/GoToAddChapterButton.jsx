@@ -1,22 +1,28 @@
 import React from "react";
-import { ArrowLeft } from "lucide-react";
+import { useParams } from "react-router-dom";
+
 export function GoToAddChapterButton({
   navigate,
+  _id,
   subjectId,
   classId,
   subjectName,
 }) {
+  const { classId: routeClassId } = useParams();
+  const effectiveClassId = classId || routeClassId;
+  const effectiveSubjectId = subjectId || _id;
+
   return (
     <div>
       <button
+        disabled={!effectiveClassId || !effectiveSubjectId}
         onClick={() =>
-          navigate(`/${classId}/${subjectId}/add-chapters`, {
-            state: { subjectName: subjectName },
+          navigate(`/${effectiveClassId}/${effectiveSubjectId}/add-chapters`, {
+            state: { subjectName },
           })
         }
         className="btn btn-outline-danger"
       >
-        {/* <ArrowLeft className="w-5 h-5" /> */}
         <span>Add Chapters</span>
       </button>
     </div>

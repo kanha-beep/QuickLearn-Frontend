@@ -1,25 +1,24 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
-import { api, apiRoutes } from "../../api.js";
+import React, { useState } from "react";
+import { useAddSubject } from "../hooks";
 
 export default function AddSubject() {
   const { classId } = useParams();
   const navigate = useNavigate();
   const [subjectName, setSubjectName] = useState("");
   const [order, setOrder] = useState("");
+  const addSubjectCalled = useAddSubject();
 
-  const handleAddSubject = async (event) => {
-    event.preventDefault();
+  const handleAddSubject = async (e) => {
+    e.preventDefault();
     try {
-      await api.post(apiRoutes.addSubject(classId), {
-        subject_name: subjectName,
-        order,
-      });
+      await addSubjectCalled(classId, subjectName, order);
       setSubjectName("");
       setOrder("");
-      navigate(`/${classId}`);
+      return navigate(`/${classId}`);
     } catch (error) {
-      console.log("error adding subject: ", error?.response?.data?.msg);
+      console.log("error adding class: ", error?.response?.data?.msg);
+      return navigate(`/${classId}`);
     }
   };
 
@@ -45,7 +44,7 @@ export default function AddSubject() {
             </label>
             <select
               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
-              onChange={(event) => setSubjectName(event.target.value)}
+              onChange={(e) => setSubjectName(e.target.value)}
               value={subjectName}
             >
               <option value="">Select Subject</option>
@@ -72,7 +71,7 @@ export default function AddSubject() {
               type="number"
               placeholder="1"
               value={order}
-              onChange={(event) => setOrder(event.target.value)}
+              onChange={(e) => setOrder(e.target.value)}
               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
             />
           </div>

@@ -1,29 +1,34 @@
 import { useLocation } from "react-router-dom";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { api, apiRoutes } from "../../api";
+import { api } from "../../api";
 
 export default function EditChapters() {
   const navigate = useNavigate();
-  const [order, setOrder] = React.useState();
+  console.log("useLocation:", useLocation());
+  const chapterO= useLocation().state?.chapterO;
+  const [order, setOrder] = React.useState(chapterO);
   const { subjectId, chapterId, classId } = useParams();
   const chapterN = useLocation().state?.chapterN;
+  console.log("EditSections props: ", chapterN);
   const [chapterName, setChapterName] = React.useState(chapterN);
-
   const handleChapterDataUpdate = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.patch(apiRoutes.editChapter(subjectId, chapterId), {
-        chapterName,
-        order,
-      });
+      const res = await api.patch(
+        `/api/subjects/${subjectId}/chapters/${chapterId}/edit`,
+        {
+          chapterName,
+          order,
+        }
+      );
       console.log("chapter updated successfully: ", res?.data);
       return navigate(`/${classId}/subjects/${subjectId}/chapters`);
     } catch (err) {
       console.error("Error updating section: ", err?.response?.data);
     }
   };
-
+  console.log("chapterName: ", chapterName, chapterO);
   return (
     <div>
       <h1>Edit Chapter</h1>

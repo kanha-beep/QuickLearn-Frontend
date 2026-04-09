@@ -1,5 +1,6 @@
 import React from "react";
 import { ArrowLeft } from "lucide-react";
+
 export function HomePageButton({ navigate, classId }) {
   return (
     <div>

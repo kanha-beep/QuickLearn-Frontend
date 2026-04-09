@@ -1,19 +1,20 @@
 import React from "react";
 
-export function EditSingleChapterButton({ navigate, subjectId, c, classId }) {
+export function EditSingleChapterButton({ navigate, subjectId, classId, chapter }) {
   return (
     <div>
       <button
         onClick={() =>
           navigate(
-            `/${classId}/subjects/${subjectId}/chapters/${c?._id}/edit`,
+            `/${classId}/subjects/${subjectId}/chapters/${chapter?._id}/edit`,
             {
               state: {
-                subjectId: subjectId,
-                chapterId: c._id,
-                chapterN: c.chapter_name,
+                subjectId,
+                chapterId: chapter?._id,
+                chapterN: chapter?.chapter_name,
+                chapterO: chapter?.order,
               },
-            }
+            },
           )
         }
         className="btn btn-outline-success btn-sm"

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { api, apiRoutes } from "../../api.js";
+import { api } from "../../api.js";
 
 export default function AddClass() {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ export default function AddClass() {
   const handleAddClass = async (e) => {
     e.preventDefault();
     try {
-      await api.post(apiRoutes.addClass, { classes, order });
+      await api.post(`/api/class/add-class`, { classes, order });
       setClasses("");
       setOrder("");
       return navigate("/");

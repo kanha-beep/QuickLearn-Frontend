@@ -1,12 +1,18 @@
-import { apiRoutes } from "../../../api.js";
-
-export const AddChapter = async (classId, chaptersList, api, subjectId, setChaptersList, setChapterName, navigate, order) => {
+export const AddChapter = async (
+  classId,
+  chaptersList,
+  api,
+  subjectId,
+  setChaptersList,
+  setChapterName,
+  navigate,
+) => {
   if (chaptersList.length === 0) return alert("Add at least one chapter");
+
   try {
-    const res = await api.post(apiRoutes.addChapters(subjectId), {
+    const res = await api.post(`/api/subjects/${subjectId}/chapters/add-chapters`, {
       chapters: chaptersList,
-      classId: classId,
-      order: order,
+      classId,
     });
     console.log("Response:", res.data);
     setChaptersList([]);
