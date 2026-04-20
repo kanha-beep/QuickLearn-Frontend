@@ -12,9 +12,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const getAllClasses = async () => {
-      const res = await api.get("/api/class");
-      setClasses(res?.data?.getAllClasses || []);
-      setLoading(false);
+      try {
+        const res = await api.get("/api/class");
+        setClasses(res?.data?.getAllClasses || []);
+      } catch (error) {
+        console.error("Failed to load dashboard classes:", error?.response?.data || error);
+        setClasses([]);
+      } finally {
+        setLoading(false);
+      }
     };
     getAllClasses();
   }, []);

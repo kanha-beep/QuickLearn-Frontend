@@ -1,13 +1,16 @@
 import { GraduationCap } from "lucide-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { api } from "../../api.js";
+import { clearAuthSession, getStoredRole, getStoredToken } from "../auth.js";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const token = localStorage.getItem("token");
-  const roles = localStorage.getItem("roles");
-  const isLoggedIn = !!token && token !== "undefined" && token !== "null";
+  const newsUrl = "https://news-frontend-plum.vercel.app/";
+  const token = getStoredToken();
+  const roles = getStoredRole();
+  const isLoggedIn = Boolean(token);
   const isAdmin = roles === "admin";
   const pathname = location.pathname;
   const pathParts = pathname.split("/").filter(Boolean);
@@ -67,6 +70,14 @@ export default function Navbar() {
               />
             </div>
           )}
+          {isLoggedIn && (
+            <button
+              className="rounded-lg border border-violet-200 px-3 py-2 text-sm font-medium text-violet-700 transition hover:bg-violet-50 sm:px-4"
+              onClick={() => window.open(newsUrl, "_blank", "noopener,noreferrer")}
+            >
+              News
+            </button>
+          )}
           {isLoggedIn && isAdmin && (
             <button
               className="rounded-lg border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50 sm:px-4"
@@ -85,11 +96,15 @@ export default function Navbar() {
           ) : (
             <button
               className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50 sm:px-4"
-              onClick={() => {
-                localStorage.removeItem("token");
-                localStorage.removeItem("tokens");
-                localStorage.removeItem("user");
-                localStorage.removeItem("roles");
+              onClick={async () => {
+                try {
+                  await api.post("/api/auth/logout");
+                } catch (error) {
+                  console.error("Logout request failed:", error?.response?.data || error);
+                } finally {
+                  clearAuthSession();
+                }
+
                 navigate("/auth");
               }}
             >

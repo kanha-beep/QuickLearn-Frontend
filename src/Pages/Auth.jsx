@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { api } from "../../api.js";
 import { WrapAsync } from "../Utils/WrapAsync.js";
+import { storeAuthSession } from "../auth.js";
 
 export default function Auth({
   userRoles,
@@ -30,58 +31,55 @@ export default function Auth({
 
   const handleUserAuth = WrapAsync(
     async () => {
-      if (isLogin) {
-        const res = await api.post("/api/auth/login", formData);
-        localStorage.setItem("user", JSON.stringify(res?.data?.user));
-        localStorage.setItem("token", res?.data?.token);
-        const role = res?.data?.roles || res?.data?.user?.roles || "";
-        localStorage.setItem("roles", role);
-        setUserRoles(role);
-        setIsLoggedIn(true);
-        navigate("/");
-        return res;
-      } else {
-        const res = await api.post("/api/auth/register", formData);
-        console.log("owner came: ", res?.data)
-        localStorage.setItem("user", JSON.stringify(res?.data?.user));
-        localStorage.setItem("token", res?.data?.token);
-        const role = res?.data?.roles || res?.data?.user?.roles || "";
-        localStorage.setItem("roles", role);
-        setUserRoles(role);
-        setIsLoggedIn(true);
-        navigate("/");
-        return res;
+      if (!isLogin && formData.password !== formData.confirmPassword) {
+        throw new Error("Passwords do not match");
       }
+
+      const res = await api.post(isLogin ? "/api/auth/login" : "/api/auth/register", {
+        email: formData.email.trim(),
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        name: formData.name.trim(),
+      });
+      const role = res?.data?.roles || res?.data?.user?.roles || "";
+      storeAuthSession({
+        token: res?.data?.token,
+        user: res?.data?.user,
+        roles: role,
+      });
+      setUserRoles(role);
+      setIsLoggedIn(true);
+      navigate("/");
+      return res;
     },
     setMsg,
     setMsgType,
   );
 
-  const handleOwnerAuth = async () => {
-    if (isLogin) {
-      try {
-        const res = await api.post("/api/auth/owner/login", formData);
-        console.log("user logged in: ", res?.data);
-        localStorage.setItem("user", JSON.stringify(res?.data?.user));
-        localStorage.setItem("token", res?.data?.token);
-        setIsLoggedIn(true);
-        navigate("/all-slots");
-      } catch (e) {
-        console.log("error in login: ", e?.response?.data?.message);
-        setIsLogin(false);
+  const handleOwnerAuth = WrapAsync(
+    async () => {
+      if (!isLogin) {
+        throw new Error("Owner registration is not available");
       }
-    } else {
-      try {
-        const res = await api.post("/api/auth/owner/register", formData);
-        console.log("user registered in: ", res?.data);
-        localStorage.setItem("user", JSON.stringify(res?.data?.user));
-        localStorage.setItem("token", res?.data?.token);
-        setIsLoggedIn(true);
-        navigate("/all-slots");
-      } catch (e) {
-        console.log("error in login: ", e?.response?.data?.message);
-        setIsLogin(true);
+
+      return handleUserAuth();
+    },
+    setMsg,
+    setMsgType,
+  );
+
+  const submitAuth = async (e) => {
+    e.preventDefault();
+
+    try {
+      if (role === "owner") {
+        await handleOwnerAuth();
+      } else {
+        await handleUserAuth();
       }
+    } catch (error) {
+      setMsg(error?.response?.data?.msg || error?.message || "Authentication failed");
+      setMsgType("danger");
     }
   };
 
@@ -144,13 +142,7 @@ export default function Auth({
                   </button>
                 </div>
 
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (role === "owner") handleOwnerAuth();
-                    else handleUserAuth();
-                  }}
-                >
+                <form onSubmit={submitAuth}>
                   <div className="mb-3">
                     <label className="form-label fw-semibold">
                       <i className="fas fa-envelope me-2"></i>Email Address

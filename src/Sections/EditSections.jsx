@@ -23,10 +23,10 @@ export default function EditSections() {
   });
   useEffect(() => {
     const getSectionData = async () => {
-      GetSection(api, subjectId, chapterId, sectionId, setSectionData);
+      GetSection(api, subjectId, chapterId, sectionId, setSectionData, setOrder);
     };
     getSectionData();
-  }, []);
+  }, [chapterId, sectionId, subjectId]);
   const handleContentUpdate = async (e) => {
     UpdateSection(
       e,

@@ -48,6 +48,7 @@ export default function SubjectPage() {
   const { subjectId, classId } = useParams();
   const [searchParams] = useSearchParams();
   const [activeChapterId, setActiveChapterId] = useState("");
+  const [editableChapters, setEditableChapters] = useState([]);
   const [activeSectionId, setActiveSectionId] = useState("");
   const [activeSubsectionId, setActiveSubsectionId] = useState("");
   const [editableSections, setEditableSections] = useState([]);
@@ -67,7 +68,11 @@ export default function SubjectPage() {
   const isAdmin = storedRole === "admin" || userRole === "admin";
   const query = (searchParams.get("q") || "").trim().toLowerCase();
 
-  const filteredChapters = chaptersList.filter((chapter) =>
+  useEffect(() => {
+    setEditableChapters(chaptersList);
+  }, [chaptersList]);
+
+  const filteredChapters = editableChapters.filter((chapter) =>
     chapter?.chapter_name?.toLowerCase().includes(query),
   );
 
@@ -156,6 +161,17 @@ export default function SubjectPage() {
       (prevSections = []) => prevSections.filter((item) => item._id !== sectionId),
     );
     setDeletedSectionIds((prev) => [...prev, sectionId]);
+  };
+
+  const handleDeleteChapter = (chapterId) => {
+    setEditableChapters((prevChapters) =>
+      prevChapters.filter((chapter) => chapter._id !== chapterId),
+    );
+    if (activeChapterId === chapterId) {
+      setActiveChapterId("");
+      setActiveSectionId("");
+      setActiveSubsectionId("");
+    }
   };
 
   const startEditSubsection = (subsection, index) => {
@@ -311,7 +327,11 @@ export default function SubjectPage() {
                         classId={classId}
                         chapter={chapter}
                       />
-                      <DeleteChapterButton chapter={chapter} subjectId={subjectId} />
+                      <DeleteChapterButton
+                        chapter={chapter}
+                        subjectId={subjectId}
+                        onDelete={handleDeleteChapter}
+                      />
                       <AddSectionButton
                         navigate={navigate}
                         c={chapter}

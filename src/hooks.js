@@ -5,7 +5,17 @@ import { resAddChapter, resAddSection, resAddSubject, resDeleteChapter, resDelet
 export const useSubjects = (classId) => {
     const [subjects, setSubjects] = useState([]);
     useEffect(() => {
-        resGetSubjects(classId).then(setSubjects).catch((e) => console.log("all subjects error: ", e?.response?.data?.msg));
+        if (!classId) {
+            setSubjects([]);
+            return;
+        }
+
+        resGetSubjects(classId)
+            .then((data) => setSubjects(data || []))
+            .catch((e) => {
+                console.log("all subjects error: ", e?.response?.data?.msg || e?.message);
+                setSubjects([]);
+            });
     }, [classId])
     return subjects;
 }
@@ -18,10 +28,16 @@ export const useAddSubject = () => {
 export const useChapters = (subjectId) => {
     const [chapters, setChapters] = useState(null)
     useEffect(() => {
-        if (!subjectId) return
+        if (!subjectId) {
+            setChapters(null);
+            return;
+        }
         resGetChapters(subjectId)
             .then(setChapters)
-            .catch(e => console.log(e))
+            .catch(e => {
+                console.log(e)
+                setChapters({ chaptersList: [], chapterCount: 0, subjectName: "" })
+            })
     }, [subjectId])
     return {
         chaptersList: chapters?.chaptersList || [],
@@ -32,8 +48,13 @@ export const useChapters = (subjectId) => {
 export const useSections = (subjectId, chapterId) => {
     const [sections, setSections] = useState([])
     useEffect(() => {
-        if (!subjectId || !chapterId) return;
-        resGetSection(subjectId, chapterId).then(setSections)
+        if (!subjectId || !chapterId) {
+            setSections([]);
+            return;
+        }
+        resGetSection(subjectId, chapterId)
+            .then((data) => setSections(data || []))
+            .catch(() => setSections([]))
     }, [subjectId, chapterId])
     console.log("sections in hook: ", sections)
     return sections

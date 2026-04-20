@@ -14,11 +14,14 @@ import SingleClassPage from "./Pages/SingleClassPage.jsx";
 import AddClass from "./Class/AddClass.jsx";
 import AddSubject from "./Subjects/AddSubject.jsx";
 import DashboardPage from "./Pages/DashboardPage.jsx";
+import { api } from "../api.js";
+import { clearAuthSession, getStoredRole, getStoredToken, storeAuthSession } from "./auth.js";
 function App() {
   const [userRoles, setUserRoles] = useState("");
   const [currentView, setCurrentView] = useState("home");
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [msg, setMsg] = useState("");
   const [msgType, setMsgType] = useState("success");
 
@@ -32,8 +35,40 @@ function App() {
     setSelectedSubject(null);
   };
 
-  const token = localStorage.getItem("token");
-  const hasValidToken = !!token && token !== "undefined" && token !== "null";
+  useEffect(() => {
+    const bootstrapAuth = async () => {
+      const token = getStoredToken();
+
+      if (!token) {
+        setIsCheckingAuth(false);
+        setIsLoggedIn(false);
+        setUserRoles("");
+        return;
+      }
+
+      try {
+        const res = await api.get("/api/auth/me");
+        const nextRole = res?.data?.user?.roles || getStoredRole();
+        storeAuthSession({
+          token,
+          user: res?.data?.user,
+          roles: nextRole,
+        });
+        setUserRoles(nextRole);
+        setIsLoggedIn(true);
+      } catch (error) {
+        clearAuthSession();
+        setUserRoles("");
+        setIsLoggedIn(false);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    bootstrapAuth();
+  }, []);
+
+  const hasValidToken = Boolean(getStoredToken());
   const fallbackPath = hasValidToken ? "/" : "/auth";
 
   return (
@@ -58,7 +93,10 @@ function App() {
         <Route
           path="/*"
           element={
-            <ProtectedRoute setUserRoles={setUserRoles}>
+            <ProtectedRoute
+              isAuthenticated={isLoggedIn}
+              isCheckingAuth={isCheckingAuth}
+            >
               <Routes>
                 <Route
                   path="/"
@@ -67,7 +105,11 @@ function App() {
                 <Route
                   path="/dashboard"
                   element={
-                    <AdminRoute>
+                    <AdminRoute
+                      isAuthenticated={isLoggedIn}
+                      isCheckingAuth={isCheckingAuth}
+                      userRoles={userRoles}
+                    >
                       <DashboardPage />
                     </AdminRoute>
                   }
@@ -75,7 +117,11 @@ function App() {
                 <Route
                   path="/add-class"
                   element={
-                    <AdminRoute>
+                    <AdminRoute
+                      isAuthenticated={isLoggedIn}
+                      isCheckingAuth={isCheckingAuth}
+                      userRoles={userRoles}
+                    >
                       <AddClass onSubjectClick={handleSubjectClick} />
                     </AdminRoute>
                   }
@@ -89,13 +135,39 @@ function App() {
                 <Route
                   path="/:classId/add-subject"
                   element={
-                    <AdminRoute>
+                    <AdminRoute
+                      isAuthenticated={isLoggedIn}
+                      isCheckingAuth={isCheckingAuth}
+                      userRoles={userRoles}
+                    >
                       <AddSubject />
                     </AdminRoute>
                   }
                 />
-                <Route path="/:classId/:subjectId/add-chapters" element={<AddChapters />} />
-                <Route path="/:classId/:subjectId/:chapterId/add-sections" element={<AddSections />} />
+                <Route
+                  path="/:classId/:subjectId/add-chapters"
+                  element={
+                    <AdminRoute
+                      isAuthenticated={isLoggedIn}
+                      isCheckingAuth={isCheckingAuth}
+                      userRoles={userRoles}
+                    >
+                      <AddChapters />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/:classId/:subjectId/:chapterId/add-sections"
+                  element={
+                    <AdminRoute
+                      isAuthenticated={isLoggedIn}
+                      isCheckingAuth={isCheckingAuth}
+                      userRoles={userRoles}
+                    >
+                      <AddSections />
+                    </AdminRoute>
+                  }
+                />
                 <Route
                   path="/:classId/subjects/:subjectId/chapters"
                   element={<SubjectPage />}
@@ -115,11 +187,27 @@ function App() {
 
                 <Route
                   path="/:classId/subjects/:subjectId/chapters/:chapterId/sections/:sectionId/edit"
-                  element={<EditSections />}
+                  element={
+                    <AdminRoute
+                      isAuthenticated={isLoggedIn}
+                      isCheckingAuth={isCheckingAuth}
+                      userRoles={userRoles}
+                    >
+                      <EditSections />
+                    </AdminRoute>
+                  }
                 />
                 <Route
                   path="/:classId/subjects/:subjectId/chapters/:chapterId/edit"
-                  element={<EditChapters />}
+                  element={
+                    <AdminRoute
+                      isAuthenticated={isLoggedIn}
+                      isCheckingAuth={isCheckingAuth}
+                      userRoles={userRoles}
+                    >
+                      <EditChapters />
+                    </AdminRoute>
+                  }
                 />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

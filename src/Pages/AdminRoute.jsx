@@ -1,14 +1,14 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
+import { Loading } from "../Components/Loading.jsx";
 
-export default function AdminRoute({ children }) {
-  const token = localStorage.getItem("token");
-  const roles = localStorage.getItem("roles");
-  const isLoggedIn = !!token && token !== "undefined" && token !== "null";
-  const isAdmin = roles === "admin";
+export default function AdminRoute({ children, isAuthenticated, isCheckingAuth, userRoles }) {
+  if (isCheckingAuth) {
+    return <Loading loading />;
+  }
 
-  if (!isLoggedIn) return <Navigate to="/auth" replace />;
-  if (!isAdmin) return <Navigate to="/" replace />;
+  if (!isAuthenticated) return <Navigate to="/auth" replace />;
+  if (userRoles !== "admin") return <Navigate to="/" replace />;
 
   return children;
 }

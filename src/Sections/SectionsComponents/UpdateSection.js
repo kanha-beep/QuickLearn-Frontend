@@ -6,7 +6,7 @@ export const UpdateSection = async (e, api, subjectId, chapterId, sectionId, sec
             {
                 sectionName: sectionData.sectionName,
                 sectionContent: sectionData.sectionContent,
-                order,
+                order: order ?? sectionData.order,
                 subsections: sectionData.subsections || [],
             }
         );
