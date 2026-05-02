@@ -14,6 +14,7 @@ import SingleClassPage from "./Pages/SingleClassPage.jsx";
 import AddClass from "./Class/AddClass.jsx";
 import AddSubject from "./Subjects/AddSubject.jsx";
 import DashboardPage from "./Pages/DashboardPage.jsx";
+import ContactPage from "./Pages/ContactPage.jsx";
 import { api } from "../api.js";
 import { clearAuthSession, getStoredRole, getStoredToken, storeAuthSession } from "./auth.js";
 function App() {
@@ -89,6 +90,7 @@ function App() {
             />
           }
         />
+        <Route path="/contact" element={<ContactPage />} />
 
         <Route
           path="/*"

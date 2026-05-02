@@ -7,6 +7,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const blogUrl = "https://blogs-frontend-omega.vercel.app/";
   const newsUrl = "https://news-frontend-plum.vercel.app/";
   const token = getStoredToken();
   const roles = getStoredRole();
@@ -69,6 +70,20 @@ export default function Navbar() {
                 className="form-control form-control-sm text-xs"
               />
             </div>
+          )}
+          <button
+            className="rounded-lg border border-cyan-200 px-3 py-2 text-sm font-medium text-cyan-700 transition hover:bg-cyan-50 sm:px-4"
+            onClick={() => navigate("/contact")}
+          >
+            Contact
+          </button>
+          {isLoggedIn && (
+            <button
+              className="rounded-lg border border-sky-200 px-3 py-2 text-sm font-medium text-sky-700 transition hover:bg-sky-50 sm:px-4"
+              onClick={() => window.open(blogUrl, "_blank", "noopener,noreferrer")}
+            >
+              Blog
+            </button>
           )}
           {isLoggedIn && (
             <button
