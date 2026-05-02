@@ -43,6 +43,8 @@ const renderContent = (content = []) => {
     .join("<br/><br/>");
 };
 
+const hasRenderedContent = (content = []) => Boolean(renderContent(content));
+
 export default function SubjectPage() {
   const navigate = useNavigate();
   const { subjectId, classId } = useParams();
@@ -538,16 +540,18 @@ export default function SubjectPage() {
                 </div>
               ) : (
                 selectedSubsection ? (
-                  <div
-                    className="prose prose-sm max-w-none text-sm text-slate-700"
-                    dangerouslySetInnerHTML={{
-                      __html: renderContent(selectedSubsection.subsection_content),
-                    }}
-                  />
+                  hasRenderedContent(selectedSubsection.subsection_content) ? (
+                    <div
+                      className="prose prose-sm max-w-none text-sm text-slate-700"
+                      dangerouslySetInnerHTML={{
+                        __html: renderContent(selectedSubsection.subsection_content),
+                      }}
+                    />
+                  ) : (
+                    <p className="text-sm text-slate-500">Coming soon</p>
+                  )
                 ) : (
-                  <p className="text-sm text-slate-500">
-                    Select a subsection to read its explanation.
-                  </p>
+                  <p className="text-sm text-slate-500">Coming soon</p>
                 )
               )}
             </div>
@@ -556,6 +560,7 @@ export default function SubjectPage() {
           <>
             <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
               <div className="mb-3 text-sm font-semibold text-slate-700">Subsections</div>
+              <p className="text-sm text-slate-500">Coming soon</p>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
@@ -563,16 +568,18 @@ export default function SubjectPage() {
                 Explanation
               </div>
               {selectedSection ? (
-                <div
-                  className="prose prose-sm max-w-none text-sm text-slate-700"
-                  dangerouslySetInnerHTML={{
-                    __html: renderContent(selectedSection.section_content),
-                  }}
-                />
+                hasRenderedContent(selectedSection.section_content) ? (
+                  <div
+                    className="prose prose-sm max-w-none text-sm text-slate-700"
+                    dangerouslySetInnerHTML={{
+                      __html: renderContent(selectedSection.section_content),
+                    }}
+                  />
+                ) : (
+                  <p className="text-sm text-slate-500">Coming soon</p>
+                )
               ) : (
-                <p className="text-sm text-slate-500">
-                  Select a section to read its explanation.
-                </p>
+                <p className="text-sm text-slate-500">Coming soon</p>
               )}
             </div>
           </>
