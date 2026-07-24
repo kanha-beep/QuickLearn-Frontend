@@ -8,22 +8,34 @@ import { AddChapter } from "./ChaptersComponents/AddChapter.js";
 import { ShowChaptersList } from "./ChaptersComponents/ShowChaptersList.jsx";
 import { SaveChapterButton } from "./ChaptersButtons/SaveChapterButton.jsx";
 import { AddChapterButton } from "./ChaptersButtons/AddChapterButton.jsx";
+import { getNextOrderNumber, getNextOrderValue } from "../Components/order.js";
+import { useChapters } from "../hooks.js";
 
 export default function AddChapters() {
   const navigate = useNavigate();
   const { subjectId, classId } = useParams();
-  const [order, setOrder] = useState("");
+  const { chaptersList: existingChapters } = useChapters(subjectId);
+  const [order, setOrder] = useState("1");
   const [chaptersList, setChaptersList] = useState([]);
   const [chapterName, setChapterName] = useState("");
 
+  React.useEffect(() => {
+    if (chaptersList.length > 0) return;
+    setOrder(getNextOrderValue(existingChapters));
+  }, [existingChapters, chaptersList.length]);
+
   const handleAddChapter = () => {
-    AddChapterToList(
+    const nextOrder = AddChapterToList(
       chapterName,
       order,
+      getNextOrderNumber(chaptersList),
       setChaptersList,
       setChapterName,
-      setOrder,
     );
+
+    if (nextOrder) {
+      setOrder(nextOrder);
+    }
   };
 
   const handleSubmit = async (e) => {

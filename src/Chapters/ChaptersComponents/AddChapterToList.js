@@ -1,21 +1,24 @@
+import { resolveOrderNumber } from "../../Components/order.js";
+
 export const AddChapterToList = (
   chapterName,
   order,
+  fallbackOrder,
   setChaptersList,
   setChapterName,
-  setOrder,
 ) => {
   const trimmedName = chapterName.trim();
-  if (!trimmedName) return;
+  if (!trimmedName) return null;
 
+  const resolvedOrder = resolveOrderNumber(order, fallbackOrder);
   setChaptersList((prev) => [
     ...prev,
     {
       chapter_name: trimmedName,
-      order: order ? Number(order) : prev.length + 1,
+      order: resolvedOrder,
     },
   ]);
 
   setChapterName("");
-  setOrder("");
+  return String(resolvedOrder + 1);
 };

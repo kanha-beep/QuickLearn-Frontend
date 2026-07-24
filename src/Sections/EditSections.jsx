@@ -4,11 +4,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { handleChange } from "../Components/HandleChange.js";
 import { UpdateSection } from "./SectionsComponents/UpdateSection.js";
 import { GetSection } from "./SectionsComponents/GetSection.js";
+import { getNextOrderNumber } from "../Components/order.js";
 
 const createEmptySubsection = (order = "") => ({
   subsection_name: "",
   subsection_content: "",
-  order,
+  order: String(order),
 });
 
 export default function EditSections() {
@@ -59,7 +60,7 @@ export default function EditSections() {
       sectionContent: "",
       subsections: [
         ...prev.subsections,
-        createEmptySubsection(prev.subsections.length + 1),
+        createEmptySubsection(getNextOrderNumber(prev.subsections)),
       ],
     }));
   };

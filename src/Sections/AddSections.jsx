@@ -5,18 +5,20 @@ import { api } from "../../api.js";
 import { handleChange } from "../Components/HandleChange.js";
 import { AddSection } from "./SectionsComponents/AddSection.js";
 import { useEffect } from "react";
+import { getNextOrderValue, resolveOrderNumber } from "../Components/order.js";
+import { useSections } from "../hooks.js";
 
 const emptySectionForm = {
   sectionName: "",
   sectionContent: "",
-  order: "",
+  order: "1",
   subsections: [],
 };
 
 const emptySubsectionDraft = {
   subsection_name: "",
   subsection_content: "",
-  order: "",
+  order: "1",
 };
 
 export default function AddSections() {
@@ -25,6 +27,7 @@ export default function AddSections() {
   const { chapterId, subjectId, classId } = useParams();
 
   const whatToAdd = location.state?.addButton || "";
+  const existingSections = useSections(subjectId, chapterId);
   const [sections, setSections] = useState(emptySectionForm);
   const [subsectionDraft, setSubsectionDraft] = useState(emptySubsectionDraft);
   console.log(
@@ -45,6 +48,14 @@ export default function AddSections() {
       setAddView("meanings");
     }
   }, [whatToAdd]);
+
+  useEffect(() => {
+    setSections((prev) =>
+      prev.sectionName || prev.sectionContent || prev.subsections.length > 0
+        ? prev
+        : { ...prev, order: getNextOrderValue(existingSections) },
+    );
+  }, [existingSections]);
 
   const handleAddSections = async (e) => {
     console.log("section adding started from page: ", sections);
@@ -69,12 +80,23 @@ export default function AddSections() {
   const handleAddSubsection = () => {
     if (!subsectionDraft.subsection_name.trim()) return;
 
+    const resolvedOrder = resolveOrderNumber(
+      subsectionDraft.order,
+      sections.subsections.length + 1,
+    );
+
     setSections((prev) => ({
       ...prev,
       sectionContent: "",
-      subsections: [...prev.subsections, subsectionDraft],
+      subsections: [
+        ...prev.subsections,
+        { ...subsectionDraft, order: String(resolvedOrder) },
+      ],
     }));
-    setSubsectionDraft(emptySubsectionDraft);
+    setSubsectionDraft({
+      ...emptySubsectionDraft,
+      order: String(resolvedOrder + 1),
+    });
   };
 
   const handleDeleteSubsection = (indexToDelete) => {
@@ -141,9 +163,9 @@ export default function AddSections() {
             </div>
             <div className="col-12">
               <label className="form-label fw-semibold">
-                {addView === "sections" ? "Section content" : "Word meaning"}
+                {addView === "sections" ? "" : "Word meaning"}
               </label>
-              <textarea
+              {/* <textarea
                 rows="14"
                 cols="30"
                 placeholder={
@@ -158,7 +180,7 @@ export default function AddSections() {
                 value={sections.sectionContent}
                 className="form-control"
                 disabled={sections.subsections.length > 0}
-              />
+              /> */}
               {sections.subsections.length > 0 && (
                 <p className="mt-2 mb-0 small text-muted">
                   This section has subsections, so the main section content stays empty.

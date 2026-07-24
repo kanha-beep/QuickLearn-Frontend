@@ -1,15 +1,22 @@
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useState } from "react";
 import { useAddSubject } from "../hooks";
+import { useSubjects } from "../hooks.js";
+import { getNextOrderValue } from "../Components/order.js";
 
 export default function AddSubject() {
   const { classId } = useParams();
   const navigate = useNavigate();
   const [subjectName, setSubjectName] = useState("");
   const [customSubjectName, setCustomSubjectName] = useState("");
-  const [order, setOrder] = useState("");
+  const subjects = useSubjects(classId);
+  const [order, setOrder] = useState("1");
   const addSubjectCalled = useAddSubject();
   const isCustomSubject = subjectName === "__custom__";
+
+  React.useEffect(() => {
+    setOrder(getNextOrderValue(subjects));
+  }, [subjects]);
 
   const handleAddSubject = async (e) => {
     e.preventDefault();
@@ -21,7 +28,7 @@ export default function AddSubject() {
       await addSubjectCalled(classId, finalSubjectName, order);
       setSubjectName("");
       setCustomSubjectName("");
-      setOrder("");
+      setOrder(getNextOrderValue(subjects));
       return navigate(`/${classId}`);
     } catch (error) {
       console.log("error adding class: ", error?.response?.data?.msg);

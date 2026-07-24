@@ -1,18 +1,38 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { api } from "../../api.js";
+import { getNextOrderValue } from "../Components/order.js";
 
 export default function AddClass() {
   const navigate = useNavigate();
   const [classes, setClasses] = useState("");
-  const [order, setOrder] = useState("");
+  const [existingClasses, setExistingClasses] = useState([]);
+  const [order, setOrder] = useState("1");
+
+  useEffect(() => {
+    const getAllClasses = async () => {
+      try {
+        const res = await api.get("/api/class");
+        setExistingClasses(res?.data?.getAllClasses || []);
+      } catch (error) {
+        console.log("error loading classes: ", error?.response?.data?.msg);
+        setExistingClasses([]);
+      }
+    };
+
+    getAllClasses();
+  }, []);
+
+  useEffect(() => {
+    setOrder(getNextOrderValue(existingClasses));
+  }, [existingClasses]);
 
   const handleAddClass = async (e) => {
     e.preventDefault();
     try {
       await api.post(`/api/class/add-class`, { classes, order });
       setClasses("");
-      setOrder("");
+      setOrder(getNextOrderValue(existingClasses));
       return navigate("/");
     } catch (error) {
       console.log("error adding class: ", error?.response?.data?.msg);

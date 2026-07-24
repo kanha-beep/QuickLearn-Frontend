@@ -27,8 +27,6 @@ export const getStoredRole = () => localStorage.getItem(ROLE_KEY) || "";
 export const storeAuthSession = ({ token = "", user = null, roles = "" }) => {
   if (token) {
     localStorage.setItem(TOKEN_KEY, token);
-  } else {
-    localStorage.removeItem(TOKEN_KEY);
   }
 
   if (user) {

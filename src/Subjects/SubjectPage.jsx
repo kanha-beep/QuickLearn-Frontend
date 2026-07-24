@@ -10,6 +10,7 @@ import { GoToAddChapterButton } from "../Chapters/ChaptersButtons/GoToAddChapter
 import { EditSectionButton } from "../Sections/SectionsButtons/EditSectionButton.jsx";
 import { DeleteSectionButton } from "../Sections/SectionsButtons/DeleteSectionButton.jsx";
 import { DeleteSection } from "../Sections/SectionsComponents/DeleteSection.js";
+import SafeRichContent, { hasSafeRenderableContent } from "../Components/SafeRichContent.jsx";
 
 const buildSubsectionKey = (sectionId, subsection, index) =>
   subsection?._id || `${sectionId}-${index}`;
@@ -28,14 +29,6 @@ const toContentArray = (content = "") =>
     .map((item) => item.trim())
     .filter(Boolean);
 
-const escapeHtml = (value = "") =>
-  String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-
 const getContentItems = (content = []) => {
   if (Array.isArray(content)) {
     return content.map((item) => String(item).trim()).filter(Boolean);
@@ -47,79 +40,7 @@ const getContentItems = (content = []) => {
     .filter(Boolean);
 };
 
-const isAllowedYoutubeEmbed = (value = "") =>
-  /^<iframe[\s\S]*src=["']https:\/\/(?:www\.)?(?:youtube\.com\/embed\/|youtube-nocookie\.com\/embed\/)[^"']+["'][\s\S]*<\/iframe>$/.test(
-    String(value).trim(),
-  );
-
-const isAllowedVideoTag = (value = "") => {
-  const trimmed = String(value).trim();
-  return (
-    /^<video[\s\S]*<\/video>$/.test(trimmed) &&
-    /src=["']https?:\/\/[^"']+["']/.test(trimmed)
-  );
-};
-
-const getYoutubeEmbedUrl = (value = "") => {
-  const trimmed = String(value).trim();
-
-  const shortMatch = trimmed.match(
-    /^https?:\/\/(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})(?:\?.*)?$/i,
-  );
-  if (shortMatch) {
-    return `https://www.youtube.com/embed/${shortMatch[1]}`;
-  }
-
-  const watchMatch = trimmed.match(
-    /^https?:\/\/(?:www\.)?youtube\.com\/watch\?(?:.*&)?v=([a-zA-Z0-9_-]{11})(?:[&#?].*)?$/i,
-  );
-  if (watchMatch) {
-    return `https://www.youtube.com/embed/${watchMatch[1]}`;
-  }
-
-  const embedMatch = trimmed.match(
-    /^https?:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/embed\/([a-zA-Z0-9_-]{11})(?:\?.*)?$/i,
-  );
-  if (embedMatch) {
-    return `https://www.youtube.com/embed/${embedMatch[1]}`;
-  }
-
-  return "";
-};
-
-const createYoutubeIframe = (src) =>
-  `<iframe width="320" height="350" src="${src}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
-
-const renderContent = (content = []) => {
-  const items = getContentItems(content);
-
-  const wholeYoutubeUrl = getYoutubeEmbedUrl(items.join(" "));
-  if (wholeYoutubeUrl) {
-    return createYoutubeIframe(wholeYoutubeUrl);
-  }
-
-  const legacyJoinedYoutubeUrl = getYoutubeEmbedUrl(items.join("."));
-  if (legacyJoinedYoutubeUrl) {
-    return createYoutubeIframe(legacyJoinedYoutubeUrl);
-  }
-
-  return items
-    .map((item) => {
-      const youtubeEmbedUrl = getYoutubeEmbedUrl(item);
-      if (youtubeEmbedUrl) {
-        return createYoutubeIframe(youtubeEmbedUrl);
-      }
-
-      if (isAllowedYoutubeEmbed(item) || isAllowedVideoTag(item)) {
-        return item;
-      }
-
-      return escapeHtml(item);
-    })
-    .join("<br/><br/>");
-};
-
-const hasRenderedContent = (content = []) => Boolean(renderContent(content));
+const hasRenderedContent = (content = []) => hasSafeRenderableContent(content);
 
 export default function SubjectPage() {
   const navigate = useNavigate();
@@ -540,7 +461,7 @@ export default function SubjectPage() {
                 })}
               </div>
             </div>
-
+            {/* got the expalantion actual div box */}
             <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div className="text-sm font-semibold text-slate-700">Explanation</div>
@@ -617,11 +538,9 @@ export default function SubjectPage() {
               ) : (
                 selectedSubsection ? (
                   hasRenderedContent(selectedSubsection.subsection_content) ? (
-                    <div
+                    <SafeRichContent
+                      content={selectedSubsection.subsection_content}
                       className="prose prose-sm max-w-none text-sm text-slate-700"
-                      dangerouslySetInnerHTML={{
-                        __html: renderContent(selectedSubsection.subsection_content),
-                      }}
                     />
                   ) : (
                     <p className="text-sm text-slate-500">Coming soon</p>
@@ -645,11 +564,9 @@ export default function SubjectPage() {
               </div>
               {selectedSection ? (
                 hasRenderedContent(selectedSection.section_content) ? (
-                  <div
+                  <SafeRichContent
+                    content={selectedSection.section_content}
                     className="prose prose-sm max-w-none text-sm text-slate-700"
-                    dangerouslySetInnerHTML={{
-                      __html: renderContent(selectedSection.section_content),
-                    }}
                   />
                 ) : (
                   <p className="text-sm text-slate-500">Coming soon</p>

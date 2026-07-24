@@ -7,7 +7,7 @@ export const AddSection = async (e, sections, api, subjectId, chapterId, setSect
             sections
         );
         console.log("response after adding sections: ", res);
-        setSections({ sectionName: "", sectionContent: "", order: "", subsections: [] });
+        setSections({ sectionName: "", sectionContent: "", order: "1", subsections: [] });
         return navigate(`/${classId}/subjects/${subjectId}/chapters`);
     } catch (e) {
         console.error("Error adding section: ", e?.response?.data?.msg);

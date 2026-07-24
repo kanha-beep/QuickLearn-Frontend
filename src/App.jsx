@@ -38,20 +38,10 @@ function App() {
 
   useEffect(() => {
     const bootstrapAuth = async () => {
-      const token = getStoredToken();
-
-      if (!token) {
-        setIsCheckingAuth(false);
-        setIsLoggedIn(false);
-        setUserRoles("");
-        return;
-      }
-
       try {
         const res = await api.get("/api/auth/me");
-        const nextRole = res?.data?.user?.roles || getStoredRole();
+        const nextRole = res?.data?.user?.roles || getStoredRole() || "";
         storeAuthSession({
-          token,
           user: res?.data?.user,
           roles: nextRole,
         });
@@ -69,7 +59,7 @@ function App() {
     bootstrapAuth();
   }, []);
 
-  const hasValidToken = Boolean(getStoredToken());
+  const hasValidToken = Boolean(getStoredToken() || getStoredRole());
   const fallbackPath = hasValidToken ? "/" : "/auth";
 
   return (
@@ -106,15 +96,7 @@ function App() {
                 />
                 <Route
                   path="/dashboard"
-                  element={
-                    <AdminRoute
-                      isAuthenticated={isLoggedIn}
-                      isCheckingAuth={isCheckingAuth}
-                      userRoles={userRoles}
-                    >
-                      <DashboardPage />
-                    </AdminRoute>
-                  }
+                  element={<DashboardPage userRoles={userRoles} />}
                 />
                 <Route
                   path="/add-class"

@@ -1,7 +1,7 @@
 import { GraduationCap } from "lucide-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../../api.js";
-import { clearAuthSession, getStoredRole, getStoredToken } from "../auth.js";
+import { clearAuthSession, getStoredRole, getStoredToken, getStoredUser } from "../auth.js";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -11,7 +11,8 @@ export default function Navbar() {
   const newsUrl = "https://news-frontend-plum.vercel.app/";
   const token = getStoredToken();
   const roles = getStoredRole();
-  const isLoggedIn = Boolean(token);
+  const user = getStoredUser();
+  const isLoggedIn = Boolean(token || user || roles);
   const isAdmin = roles === "admin";
   const pathname = location.pathname;
   const pathParts = pathname.split("/").filter(Boolean);
@@ -55,9 +56,9 @@ export default function Navbar() {
             <GraduationCap className="h-5 w-5" />
             <span>FSSA</span>
           </button>
-          <span className="mt-1 text-xs font-medium text-white">
+          {/* <span className="mt-1 text-xs font-medium text-white">
             Your Learning Companion
-          </span>
+          </span> */}
         </div>
         <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:flex-none md:justify-end">
           {searchEnabled && (
@@ -93,12 +94,12 @@ export default function Navbar() {
               News
             </button>
           )}
-          {isLoggedIn && isAdmin && (
+          {isLoggedIn && (
             <button
               className="rounded-lg border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50 sm:px-4"
               onClick={() => navigate("/dashboard")}
             >
-              Dashboard
+              {isAdmin ? "Dashboard" : "My Plan"}
             </button>
           )}
           {!isLoggedIn ? (
