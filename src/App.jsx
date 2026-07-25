@@ -63,7 +63,7 @@ function App() {
   const fallbackPath = hasValidToken ? "/" : "/auth";
 
   return (
-    <div className="" style={{ width: "98%" }}>
+    <div className="min-h-screen w-full bg-white">
       <Navbar onHomeClick={handleBackToHome} />
       <Routes>
         <Route

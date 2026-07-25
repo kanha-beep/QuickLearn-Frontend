@@ -269,9 +269,10 @@ export default function SubjectPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[95%] pb-4 pt-3 text-slate-900">
-      <section className={`grid gap-2 ${layoutClass}`}>
-        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+    <div className="mx-auto w-full max-w-[95%]  pt-3 text-slate-900 h-[43rem]">
+      {/* chapters list */}
+      <section className={`grid items-start gap-2 ${layoutClass} h-[90%]`}>
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm h-full">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div className="text-sm font-semibold text-slate-700">Chapters</div>
             {isAdmin && (
@@ -284,7 +285,8 @@ export default function SubjectPage() {
               />
             )}
           </div>
-          <div className="max-h-[11rem] space-y-2 overflow-y-auto pr-1 lg:max-h-none lg:overflow-visible lg:pr-0">
+          
+          <div className="space-y-2 overflow-auto pr-1 lg:pr-">
             {filteredChapters.map((chapter) => {
               const isActive = activeChapterId === chapter._id;
               return (
@@ -345,10 +347,10 @@ export default function SubjectPage() {
             })}
           </div>
         </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+        {/* sections list*/}
+        <div className="h-full rounded-2xl border border-slate-200 bg-white px-2 py-3 shadow-sm overflow-auto">
           <div className="mb-3 text-sm font-semibold text-slate-700">Sections</div>
-          <div className="max-h-[11rem] space-y-2 overflow-y-auto pr-1 lg:max-h-none lg:overflow-visible lg:pr-0">
+          <div className="space-y-2 overflow-y-auto pr-1 lg:pr-0">
             {visibleSections.map((section) => {
               const isActive = activeSectionId === section._id;
               return (
@@ -402,9 +404,9 @@ export default function SubjectPage() {
 
         {selectedSection && hasSubsections ? (
           <>
-            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm overflow-auto">
               <div className="mb-3 text-sm font-semibold text-slate-700">Subsections</div>
-              <div className="max-h-[20rem] space-y-2 overflow-y-auto pr-1 lg:max-h-none lg:overflow-visible lg:pr-0">
+              <div className="max-h-[20rem] space-y-2 overflow-y-auto pr-1 lg:pr-0">
                 {sectionSubsections.map((subsection, index) => {
                   const subsectionKey =
                     buildSubsectionKey(selectedSection._id, subsection, index);
@@ -536,6 +538,7 @@ export default function SubjectPage() {
                   </div>
                 </div>
               ) : (
+                // actual explanation
                 selectedSubsection ? (
                   hasRenderedContent(selectedSubsection.subsection_content) ? (
                     <SafeRichContent

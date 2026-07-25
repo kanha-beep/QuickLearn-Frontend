@@ -42,6 +42,20 @@ const getVideoUrl = (value = "") => {
   return urlMatch ? urlMatch[0] : "";
 };
 
+const splitLeadingNumber = (value = "") => {
+  const trimmed = String(value).trim();
+  const match = trimmed.match(/^(\d+\.)(\s*)(.*)$/);
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    number: match[1],
+    text: match[3],
+  };
+};
+
 export function hasSafeRenderableContent(content = []) {
   return getContentItems(content).length > 0;
 }
@@ -86,10 +100,23 @@ export default function SafeRichContent({ content = [], className = "" }) {
           );
         }
 
+        const numberedItem = splitLeadingNumber(item);
+
         return (
-          // mil gya subsection summary content
-          <p key={`${item.slice(0, 32)}-${index}`} className="last:mb-0 font-semibold text-[1rem]">
-            {item}
+          <p
+            key={`${item.slice(0, 32)}-${index}`}
+            className="mb-3 last:mb-0 text-[1rem] font-normal leading-7 text-slate-700"
+          >
+            {numberedItem ? (
+              <>
+                <span className="mr-3 inline-block min-w-[2.25rem] font-medium text-slate-900">
+                  {numberedItem.number}
+                </span>
+                <span>{numberedItem.text}</span>
+              </>
+            ) : (
+              item
+            )}
           </p>
         );
       })}
