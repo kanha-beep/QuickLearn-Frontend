@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { motion } from "motion/react";
 import { api } from "../../api.js";
 import { useChapters, useSections } from "../hooks.js";
 import { HomePageButton } from "../Pages/HomePageButton.jsx";
@@ -10,14 +11,19 @@ import { GoToAddChapterButton } from "../Chapters/ChaptersButtons/GoToAddChapter
 import { EditSectionButton } from "../Sections/SectionsButtons/EditSectionButton.jsx";
 import { DeleteSectionButton } from "../Sections/SectionsButtons/DeleteSectionButton.jsx";
 import { DeleteSection } from "../Sections/SectionsComponents/DeleteSection.js";
-import SafeRichContent, { hasSafeRenderableContent } from "../Components/SafeRichContent.jsx";
+import SafeRichContent, {
+  hasSafeRenderableContent,
+} from "../Components/SafeRichContent.jsx";
 
 const buildSubsectionKey = (sectionId, subsection, index) =>
   subsection?._id || `${sectionId}-${index}`;
 
 const toTextareaValue = (content = []) => {
   if (Array.isArray(content)) {
-    return content.map((item) => String(item).trim()).filter(Boolean).join("\n");
+    return content
+      .map((item) => String(item).trim())
+      .filter(Boolean)
+      .join("\n");
   }
 
   return String(content || "");
@@ -96,7 +102,10 @@ export default function SubjectPage() {
   }, [sections]);
 
   const visibleSections = useMemo(
-    () => editableSections.filter((section) => !deletedSectionIds.includes(section._id)),
+    () =>
+      editableSections.filter(
+        (section) => !deletedSectionIds.includes(section._id),
+      ),
     [editableSections, deletedSectionIds],
   );
 
@@ -130,7 +139,8 @@ export default function SubjectPage() {
 
     const activeStillExists = sectionSubsections.some(
       (subsection, index) =>
-        (subsection._id || `${selectedSection?._id}-${index}`) === activeSubsectionId,
+        (subsection._id || `${selectedSection?._id}-${index}`) ===
+        activeSubsectionId,
     );
 
     if (activeSubsectionId && !activeStillExists) {
@@ -142,7 +152,8 @@ export default function SubjectPage() {
   const selectedSubsection =
     sectionSubsections.find(
       (subsection, index) =>
-        (subsection._id || `${selectedSection?._id}-${index}`) === activeSubsectionId,
+        (subsection._id || `${selectedSection?._id}-${index}`) ===
+        activeSubsectionId,
     ) || null;
   const hasSubsections = sectionSubsections.length > 0;
   const layoutClass = "grid-cols-2 lg:grid-cols-4";
@@ -157,7 +168,8 @@ export default function SubjectPage() {
       subjectId,
       section.chapter_of_section,
       sectionId,
-      (prevSections = []) => prevSections.filter((item) => item._id !== sectionId),
+      (prevSections = []) =>
+        prevSections.filter((item) => item._id !== sectionId),
     );
     setDeletedSectionIds((prev) => [...prev, sectionId]);
   };
@@ -176,7 +188,11 @@ export default function SubjectPage() {
   const startEditSubsection = (subsection, index) => {
     if (!selectedSection) return;
 
-    const subsectionKey = buildSubsectionKey(selectedSection._id, subsection, index);
+    const subsectionKey = buildSubsectionKey(
+      selectedSection._id,
+      subsection,
+      index,
+    );
     setActiveSubsectionId(subsectionKey);
     setEditingSubsectionId(subsectionKey);
     setSubsectionDraft({
@@ -219,7 +235,10 @@ export default function SubjectPage() {
       );
       return true;
     } catch (error) {
-      console.error("Error updating subsections: ", error?.response?.data || error);
+      console.error(
+        "Error updating subsections: ",
+        error?.response?.data || error,
+      );
       return false;
     } finally {
       setIsSavingSubsection(false);
@@ -230,7 +249,11 @@ export default function SubjectPage() {
     if (!selectedSection || !editingSubsectionId) return;
 
     const updatedSubsections = sectionSubsections.map((subsection, index) => {
-      const subsectionKey = buildSubsectionKey(selectedSection._id, subsection, index);
+      const subsectionKey = buildSubsectionKey(
+        selectedSection._id,
+        subsection,
+        index,
+      );
       if (subsectionKey !== editingSubsectionId) {
         return subsection;
       }
@@ -252,10 +275,16 @@ export default function SubjectPage() {
   const handleDeleteSubsection = async (subsectionKeyToDelete) => {
     if (!selectedSection) return;
 
-    const updatedSubsections = sectionSubsections.filter((subsection, index) => {
-      const subsectionKey = buildSubsectionKey(selectedSection._id, subsection, index);
-      return subsectionKey !== subsectionKeyToDelete;
-    });
+    const updatedSubsections = sectionSubsections.filter(
+      (subsection, index) => {
+        const subsectionKey = buildSubsectionKey(
+          selectedSection._id,
+          subsection,
+          index,
+        );
+        return subsectionKey !== subsectionKeyToDelete;
+      },
+    );
 
     const saved = await saveSubsectionsForSection(updatedSubsections);
     if (!saved) return;
@@ -269,101 +298,108 @@ export default function SubjectPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[95%]  pt-3 text-slate-900 h-[43rem]">
-      {/* chapters list */}
-      <section className={`grid items-start gap-2 ${layoutClass} h-[90%]`}>
-        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm h-full">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <div className="text-sm font-semibold text-slate-700">Chapters</div>
-            {isAdmin && (
-              <GoToAddChapterButton
-                navigate={navigate}
-                subjectId={subjectId}
-                classId={classId}
-                subjectName={subjectName}
-                className="w-full sm:w-auto"
-              />
-            )}
-          </div>
-          
-          <div className="space-y-2 overflow-auto pr-1 lg:pr-">
-            {filteredChapters.map((chapter) => {
-              const isActive = activeChapterId === chapter._id;
-              return (
-                <div
-                  key={chapter._id}
-                  className={`rounded-xl border p-2 transition ${
-                    isActive
-                      ? "border-cyan-300 bg-cyan-50"
-                      : "border-slate-200 bg-white hover:border-slate-300"
-                  }`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (activeChapterId === chapter._id) {
-                        setActiveChapterId("");
+    <motion.div
+      initial={{ opacity: 0, y: -200 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 2,
+        delay: 0.5,
+        ease: "easeInOut",
+        type: "spring",
+        stiffness: 100,
+        damping: 15,
+      }}
+    >
+      <div className="mx-auto w-full max-w-[95%]  pt-3 text-slate-900 h-[43rem]">
+        {/* chapters list */}
+        <section className={`grid items-start gap-2 ${layoutClass} h-[90%]`}>
+          <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm h-full">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="text-sm font-semibold text-slate-700">
+                Chapters
+              </div>
+              {isAdmin && (
+                <GoToAddChapterButton
+                  navigate={navigate}
+                  subjectId={subjectId}
+                  classId={classId}
+                  subjectName={subjectName}
+                  className="w-full sm:w-auto"
+                />
+              )}
+            </div>
+
+            <div className="space-y-2 overflow-auto pr-1 lg:pr-">
+              {filteredChapters.map((chapter) => {
+                const isActive = activeChapterId === chapter._id;
+                return (
+                  <div
+                    key={chapter._id}
+                    className={`rounded-xl border p-2 transition ${
+                      isActive
+                        ? "border-cyan-300 bg-cyan-50"
+                        : "border-slate-200 bg-white hover:border-slate-300"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (activeChapterId === chapter._id) {
+                          setActiveChapterId("");
+                          setActiveSectionId("");
+                          setActiveSubsectionId("");
+                          return;
+                        }
+
+                        setActiveChapterId(chapter._id);
                         setActiveSectionId("");
                         setActiveSubsectionId("");
-                        return;
-                      }
+                      }}
+                      className="w-full break-words text-left text-base font-semibold text-slate-800"
+                    >
+                      <span className="inline-flex w-8 shrink-0 text-xs text-slate-500 sm:mr-5">
+                        {chapter.order}
+                      </span>
+                      {chapter.chapter_name}
+                    </button>
 
-                      setActiveChapterId(chapter._id);
-                      setActiveSectionId("");
-                      setActiveSubsectionId("");
-                    }}
-                    className="w-full break-words text-left text-base font-semibold text-slate-800"
-                  >
-                    <span className="inline-flex w-8 shrink-0 text-xs text-slate-500 sm:mr-5">
-                      {chapter.order}
-                    </span>
-                    {chapter.chapter_name}
-                  </button>
-
-                  {isAdmin && isActive && (
-                    <div className={actionRowClass}>
-                      <EditSingleChapterButton
-                        navigate={navigate}
-                        subjectId={subjectId}
-                        classId={classId}
-                        chapter={chapter}
-                      />
-                      <DeleteChapterButton
-                        chapter={chapter}
-                        subjectId={subjectId}
-                        onDelete={handleDeleteChapter}
-                      />
-                      <AddSectionButton
-                        navigate={navigate}
-                        c={chapter}
-                        classId={classId}
-                        subjectId={subjectId}
-                        subjectName={subjectName}
-                      />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                    {isAdmin && isActive && (
+                      <div className={actionRowClass}>
+                        <EditSingleChapterButton
+                          navigate={navigate}
+                          subjectId={subjectId}
+                          classId={classId}
+                          chapter={chapter}
+                        />
+                        <DeleteChapterButton
+                          chapter={chapter}
+                          subjectId={subjectId}
+                          onDelete={handleDeleteChapter}
+                        />
+                        <AddSectionButton
+                          navigate={navigate}
+                          c={chapter}
+                          classId={classId}
+                          subjectId={subjectId}
+                          subjectName={subjectName}
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-        {/* sections list*/}
-        <div className="h-full rounded-2xl border border-slate-200 bg-white px-2 py-3 shadow-sm overflow-auto">
-          <div className="mb-3 text-sm font-semibold text-slate-700">Sections</div>
-          <div className="space-y-2 overflow-y-auto pr-1 lg:pr-0">
-            {visibleSections.map((section) => {
-              const isActive = activeSectionId === section._id;
-              return (
-                <div
-                  key={section._id}
-                  className={`rounded-xl border p-2 transition ${
-                    isActive
-                      ? "border-emerald-300 bg-emerald-50"
-                      : "border-slate-200 bg-white hover:border-slate-300"
-                  }`}
-                >
-                  <button
-                    type="button"
+          {/* sections list*/}
+          <div className="h-full rounded-2xl border border-slate-200 bg-white px-2 py-3 shadow-sm overflow-auto subject-scrollbar">
+            <div className="mb-3 text-sm font-semibold text-slate-700">
+              Sections
+            </div>
+            <div className="space-y-2 overflow-y-auto pr-1 lg:pr-0">
+              {visibleSections.map((section) => {
+                const isActive = activeSectionId === section._id;
+                return (
+                  <div
                     onClick={() => {
                       if (activeSectionId === section._id) {
                         setActiveSectionId("");
@@ -374,175 +410,243 @@ export default function SubjectPage() {
                       setActiveSectionId(section._id);
                       setActiveSubsectionId("");
                     }}
-                    className="w-full break-words text-left text-base font-semibold text-slate-800"
+                    key={section._id}
+                    className={`rounded-xl border p-2 transition-color ${
+                      isActive
+                        ? "border-cyan-300 bg-cyan-50"
+                        : "border-slate-200 hover:border-blue-500 hover:bg-blue-400/40"
+                    }`}
                   >
-                    <span className="inline-flex w-8 shrink-0 text-xs text-slate-500">
-                      {section.order}
-                    </span>
-                    {section.section_name}
-                  </button>
+                    <button
+                      type="button"
+                      // onClick={() => {
+                      //   if (activeSectionId === section._id) {
+                      //     setActiveSectionId("");
+                      //     setActiveSubsectionId("");
+                      //     return;
+                      //   }
 
-                  {isAdmin && isActive && (
-                    <div className={actionRowClass}>
-                      <EditSectionButton
-                        navigate={navigate}
-                        section={section}
-                        subjectId={subjectId}
-                        classId={classId}
-                      />
-                      <DeleteSectionButton
-                        handleDeleteSection={handleDeleteSection}
-                        section={section}
-                      />
+                      //   setActiveSectionId(section._id);
+                      //   setActiveSubsectionId("");
+                      // }}
+                      className={`block h-full w-full rounded-lg break-words px-1 text-left text-base font-semibold transition-colors ${
+                        isActive
+                          ? "text-slate-800"
+                          : "bg-transparent text-slate-800"
+                      }`}
+                    >
+                      <span
+                        className={`inline-flex w-8 shrink-0 text-xs ${
+                          isActive ? "text-slate-500" : "text-slate-500"
+                        }`}
+                      >
+                        {section.order}
+                      </span>
+                      {section.section_name}
+                    </button>
+
+                    {isAdmin && isActive && (
+                      <div className={actionRowClass}>
+                        <EditSectionButton
+                          navigate={navigate}
+                          section={section}
+                          subjectId={subjectId}
+                          classId={classId}
+                        />
+                        <DeleteSectionButton
+                          handleDeleteSection={handleDeleteSection}
+                          section={section}
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {selectedSection && hasSubsections ? (
+            <>
+              <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm overflow-auto subject-scrollbar">
+                <div className="mb-3 text-sm font-semibold text-slate-700">
+                  Subsections
+                </div>
+                <div className="max-h-[20rem] space-y-2 overflow-y-auto pr-1 lg:pr-0">
+                  {sectionSubsections.map((subsection, index) => {
+                    const subsectionKey = buildSubsectionKey(
+                      selectedSection._id,
+                      subsection,
+                      index,
+                    );
+                    const isActive = activeSubsectionId === subsectionKey;
+
+                    return (
+                      <div
+                        key={subsectionKey}
+                        className={`w-full rounded-xl border p-2 text-left text-base font-semibold transition ${
+                          isActive
+                            ? "border-amber-300 bg-amber-50 text-amber-900"
+                            : "border-slate-200 bg-white text-slate-800 hover:border-slate-300"
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (activeSubsectionId === subsectionKey) {
+                              setActiveSubsectionId("");
+                              return;
+                            }
+
+                            setActiveSubsectionId(subsectionKey);
+                          }}
+                          className="w-full text-left break-words"
+                        >
+                          <span className="inline-flex w-8 shrink-0 text-xs text-slate-500">
+                            {subsection.order ?? index}
+                          </span>
+                          {subsection.subsection_name}
+                        </button>
+
+                        {isAdmin && isActive && (
+                          <div className={actionRowClass}>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                startEditSubsection(subsection, index)
+                              }
+                              className="btn btn-sm btn-outline-primary"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleDeleteSubsection(subsectionKey)
+                              }
+                              className="btn btn-sm btn-outline-danger"
+                              disabled={isSavingSubsection}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {/* got the expalantion actual div box */}
+              <div className="rounded-2xl border border-slate-200 bg-black p-3 shadow-sm">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="text-sm font-semibold text-slate-700">
+                    Explanation
+                  </div>
+                  {isAdmin && editingSubsectionId && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={resetSubsectionEditor}
+                        className="btn btn-sm btn-outline-secondary"
+                        disabled={isSavingSubsection}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveSubsection}
+                        className="btn btn-sm btn-success"
+                        disabled={isSavingSubsection}
+                      >
+                        {isSavingSubsection ? "Saving..." : "Save"}
+                      </button>
                     </div>
                   )}
                 </div>
-              );
-            })}
-          </div>
-        </div>
 
-        {selectedSection && hasSubsections ? (
-          <>
-            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm overflow-auto">
-              <div className="mb-3 text-sm font-semibold text-slate-700">Subsections</div>
-              <div className="max-h-[20rem] space-y-2 overflow-y-auto pr-1 lg:pr-0">
-                {sectionSubsections.map((subsection, index) => {
-                  const subsectionKey =
-                    buildSubsectionKey(selectedSection._id, subsection, index);
-                  const isActive = activeSubsectionId === subsectionKey;
-
-                  return (
-                    <div
-                      key={subsectionKey}
-                      className={`w-full rounded-xl border p-2 text-left text-base font-semibold transition ${
-                        isActive
-                          ? "border-amber-300 bg-amber-50 text-amber-900"
-                          : "border-slate-200 bg-white text-slate-800 hover:border-slate-300"
-                      }`}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (activeSubsectionId === subsectionKey) {
-                            setActiveSubsectionId("");
-                            return;
-                          }
-
-                          setActiveSubsectionId(subsectionKey);
-                        }}
-                        className="w-full text-left break-words"
-                      >
-                        <span className="inline-flex w-8 shrink-0 text-xs text-slate-500">
-                          {subsection.order ?? index}
-                        </span>
-                        {subsection.subsection_name}
-                      </button>
-
-                      {isAdmin && isActive && (
-                        <div className={actionRowClass}>
-                          <button
-                            type="button"
-                            onClick={() => startEditSubsection(subsection, index)}
-                            className="btn btn-sm btn-outline-primary"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteSubsection(subsectionKey)}
-                            className="btn btn-sm btn-outline-danger"
-                            disabled={isSavingSubsection}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
+                {isAdmin && editingSubsectionId ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="mb-1 block text-xs font-semibold text-slate-600">
+                        Order
+                      </label>
+                      <input
+                        type="number"
+                        value={subsectionDraft.order}
+                        onChange={(e) =>
+                          setSubsectionDraft((prev) => ({
+                            ...prev,
+                            order: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none transition-all duration-200 focus:border-emerald-300 focus:ring-4 focus:ring-emerald-100"
+                      />
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-            {/* got the expalantion actual div box */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <div className="text-sm font-semibold text-slate-700">Explanation</div>
-                {isAdmin && editingSubsectionId && (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={resetSubsectionEditor}
-                      className="btn btn-sm btn-outline-secondary"
-                      disabled={isSavingSubsection}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSaveSubsection}
-                      className="btn btn-sm btn-success"
-                      disabled={isSavingSubsection}
-                    >
-                      {isSavingSubsection ? "Saving..." : "Save"}
-                    </button>
+                    <div>
+                      <label className="mb-1 block text-xs font-semibold text-slate-600">
+                        Subsection Name
+                      </label>
+                      <input
+                        type="text"
+                        value={subsectionDraft.subsection_name}
+                        onChange={(e) =>
+                          setSubsectionDraft((prev) => ({
+                            ...prev,
+                            subsection_name: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none transition-all duration-200 focus:border-emerald-300 focus:ring-4 focus:ring-emerald-100"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-semibold text-slate-600">
+                        Subsection Content
+                      </label>
+                      <textarea
+                        rows="5"
+                        value={subsectionDraft.subsection_content}
+                        onChange={(e) =>
+                          setSubsectionDraft((prev) => ({
+                            ...prev,
+                            subsection_content: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none transition-all duration-200 focus:border-emerald-300 focus:ring-4 focus:ring-emerald-100"
+                      />
+                    </div>
                   </div>
+                ) : selectedSubsection &&
+                  hasRenderedContent(selectedSubsection.subsection_content) ? (
+                  <SafeRichContent
+                    content={selectedSubsection.subsection_content}
+                    className="prose prose-sm max-w-none text-sm text-slate-700"
+                  />
+                ) : hasRenderedContent(selectedSection.section_content) ? (
+                  <SafeRichContent
+                    content={selectedSection.section_content}
+                    className="prose prose-sm max-w-none text-sm text-slate-700"
+                  />
+                ) : (
+                  <p className="text-sm text-slate-500">Coming soon</p>
                 )}
               </div>
-
-              {isAdmin && editingSubsectionId ? (
-                <div className="space-y-3">
-                  <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-600">
-                      Order
-                    </label>
-                    <input
-                      type="number"
-                      value={subsectionDraft.order}
-                      onChange={(e) =>
-                        setSubsectionDraft((prev) => ({ ...prev, order: e.target.value }))
-                      }
-                      className="form-control form-control-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-600">
-                      Subsection Name
-                    </label>
-                    <input
-                      type="text"
-                      value={subsectionDraft.subsection_name}
-                      onChange={(e) =>
-                        setSubsectionDraft((prev) => ({
-                          ...prev,
-                          subsection_name: e.target.value,
-                        }))
-                      }
-                      className="form-control form-control-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-600">
-                      Subsection Content
-                    </label>
-                    <textarea
-                      rows="5"
-                      value={subsectionDraft.subsection_content}
-                      onChange={(e) =>
-                        setSubsectionDraft((prev) => ({
-                          ...prev,
-                          subsection_content: e.target.value,
-                        }))
-                      }
-                      className="form-control"
-                    />
-                  </div>
+            </>
+          ) : (
+            <>
+              <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+                <div className="mb-3 text-sm font-semibold text-slate-700">
+                  Subsections
                 </div>
-              ) : (
-                // actual explanation
-                selectedSubsection ? (
-                  hasRenderedContent(selectedSubsection.subsection_content) ? (
+                <p className="text-sm text-slate-500">Coming soon</p>
+              </div>
+              {/* got the actual div explanation */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm h-full overflow-auto subject-scrollbar">
+                <div className="mb-3 text-sm font-semibold text-slate-700">
+                  Explanation
+                </div>
+                {selectedSection ? (
+                  hasRenderedContent(selectedSection.section_content) ? (
                     <SafeRichContent
-                      content={selectedSubsection.subsection_content}
+                      content={selectedSection.section_content}
                       className="prose prose-sm max-w-none text-sm text-slate-700"
                     />
                   ) : (
@@ -550,41 +654,16 @@ export default function SubjectPage() {
                   )
                 ) : (
                   <p className="text-sm text-slate-500">Coming soon</p>
-                )
-              )}
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-              <div className="mb-3 text-sm font-semibold text-slate-700">Subsections</div>
-              <p className="text-sm text-slate-500">Coming soon</p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-              <div className="mb-3 text-sm font-semibold text-slate-700">
-                Explanation
+                )}
               </div>
-              {selectedSection ? (
-                hasRenderedContent(selectedSection.section_content) ? (
-                  <SafeRichContent
-                    content={selectedSection.section_content}
-                    className="prose prose-sm max-w-none text-sm text-slate-700"
-                  />
-                ) : (
-                  <p className="text-sm text-slate-500">Coming soon</p>
-                )
-              ) : (
-                <p className="text-sm text-slate-500">Coming soon</p>
-              )}
-            </div>
-          </>
-        )}
-      </section>
+            </>
+          )}
+        </section>
 
-      <div className="mt-4">
-        <HomePageButton navigate={navigate} classId={classId} />
+        <div className="mt-4">
+          <HomePageButton navigate={navigate} classId={classId} />
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
+import { motion } from "motion/react";
 import { Loading } from "../Components/Loading.jsx";
 
 export default function ProtectedRoute({ children, isAuthenticated, isCheckingAuth }) {

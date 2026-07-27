@@ -45,25 +45,28 @@ export default function SectionsList({
 
   return (
     <div>
-      <h3 className="mb-3">Sections</h3>
+      <h3 className="mb-3 text-lg font-semibold text-slate-900">Sections</h3>
       {allSections.length > 0 && (
         <div>
           {allSections.map((section) => (
-            <div key={section._id} className="my-2 d-flex justify-content-between me-2">
-              <div>
-                <span className="me-2">{section?.order}</span>
+            <div
+              key={section._id}
+              className="my-2 mr-2 flex items-start justify-between gap-3"
+            >
+              <div className="flex items-start gap-2">
+                <span className="pt-2 text-sm text-slate-500">{section?.order}</span>
                 <button
                   onClick={() => toggleSection(section._id)}
                   className={`btn ${
                     openSectionId === section._id ? "btn-primary" : "btn-outline-primary"
-                  } text-start`}
+                  } text-start transition-all duration-200`}
                 >
                   <span>{section.section_name}</span>
                 </button>
               </div>
               {isAdmin && (
-                <div className="d-flex">
-                  <div className="text-truncate">
+                <div className="flex items-center">
+                  <div className="truncate">
                     <EditSectionButton
                       navigate={navigate}
                       section={section}
@@ -71,7 +74,7 @@ export default function SectionsList({
                       classId={classId}
                     />
                   </div>
-                  <div className="text-truncate">
+                  <div className="truncate">
                     <DeleteSectionButton
                       handleDeleteSection={handleDeleteSection}
                       section={section}

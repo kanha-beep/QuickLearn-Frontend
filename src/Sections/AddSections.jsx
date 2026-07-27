@@ -108,20 +108,20 @@ export default function AddSections() {
 
   console.log("adding view for: ", sections);
   return (
-    <div className="container px-3 py-4 py-md-5 px-sm-4">
+    <div className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-4 md:py-5">
       <div
-        className="mx-auto rounded-4 border-0 shadow-sm p-3 p-md-4"
+        className="mx-auto rounded-[2rem] p-3 shadow-sm transition-all duration-300 md:p-4"
         style={{ maxWidth: "980px", background: "#ffffff" }}
       >
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
-            <span className="badge text-bg-primary-subtle text-primary mb-2">
+            <span className="mb-2 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
               {addView === "meanings" ? "Add Meaning" : "Add Section"}
             </span>
-            <h1 className="h3 mb-1">
+            <h1 className="mb-1 text-3xl font-semibold text-slate-900">
               {addView === "meanings" ? "Create a new meaning" : "Create a new section"}
             </h1>
-            <p className="text-muted mb-0">
+            <p className="text-slate-500">
               Chapter: <strong>{location?.state?.chapterName || "Current chapter"}</strong>
             </p>
           </div>
@@ -134,21 +134,21 @@ export default function AddSections() {
           </button>
         </div>
 
-        <form onSubmit={handleAddSections} className="d-flex flex-column gap-4">
-          <div className="row g-3">
-            <div className="col-md-3">
-              <label className="form-label fw-semibold">Order</label>
+        <form onSubmit={handleAddSections} className="flex flex-col gap-4">
+          <div className="grid gap-3 md:grid-cols-12">
+            <div className="md:col-span-3">
+              <label className="mb-2 block text-sm font-semibold text-slate-700">Order</label>
               <input
                 type="number"
                 name="order"
                 placeholder="1"
                 value={sections.order}
                 onChange={(e) => handleChange(e, setSections)}
-                className="form-control"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
               />
             </div>
-            <div className="col-md-9">
-              <label className="form-label fw-semibold">
+            <div className="md:col-span-9">
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
                 {addView === "sections" ? "Section name" : "Word name"}
               </label>
               <input
@@ -158,11 +158,11 @@ export default function AddSections() {
                 value={sections.sectionName}
                 name="sectionName"
                 onChange={(e) => handleChange(e, setSections)}
-                className="form-control"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
               />
             </div>
-            <div className="col-12">
-              <label className="form-label fw-semibold">
+            <div className="md:col-span-12">
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
                 {addView === "sections" ? "" : "Word meaning"}
               </label>
               {/* <textarea
@@ -172,72 +172,72 @@ export default function AddSections() {
                   sections.subsections.length > 0
                     ? "Section content stays empty when subsections are added"
                     : addView === "sections"
-                    ? "Write the section explanation"
-                    : "Write the meaning"
+                      ? "Write the section explanation"
+                      : "Write the meaning"
                 }
                 name="sectionContent"
                 onChange={(e) => handleChange(e, setSections)}
                 value={sections.sectionContent}
-                className="form-control"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
                 disabled={sections.subsections.length > 0}
               /> */}
               {sections.subsections.length > 0 && (
-                <p className="mt-2 mb-0 small text-muted">
+                <p className="mt-2 text-sm text-slate-500">
                   This section has subsections, so the main section content stays empty.
                 </p>
               )}
             </div>
           </div>
 
-          <div className="rounded-4 p-3 p-md-4" style={{ background: "#f8fafc" }}>
-            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+          <div className="rounded-[2rem] p-3 md:p-4" style={{ background: "#f8fafc" }}>
+            <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="h5 mb-1">Subsections</h2>
-                <p className="text-muted mb-0">
+                <h2 className="mb-1 text-xl font-semibold text-slate-900">Subsections</h2>
+                <p className="text-slate-500">
                   Add smaller points inside this section if you need them.
                 </p>
               </div>
-              <span className="badge text-bg-light border">
+              <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
                 {sections.subsections.length} added
               </span>
             </div>
 
-            <div className="row g-3">
-              <div className="col-md-2">
-                <label className="form-label fw-semibold">Order</label>
+            <div className="grid gap-3 md:grid-cols-12">
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-sm font-semibold text-slate-700">Order</label>
                 <input
                   type="number"
                   name="order"
                   placeholder="1"
                   value={subsectionDraft.order}
                   onChange={handleSubsectionDraftChange}
-                  className="form-control"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
                 />
               </div>
-              <div className="col-md-10">
-                <label className="form-label fw-semibold">Subsection name</label>
+              <div className="md:col-span-10">
+                <label className="mb-2 block text-sm font-semibold text-slate-700">Subsection name</label>
                 <input
                   name="subsection_name"
                   placeholder="Enter subsection name"
                   value={subsectionDraft.subsection_name}
                   onChange={handleSubsectionDraftChange}
-                  className="form-control"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
                 />
               </div>
-              <div className="col-12">
-                <label className="form-label fw-semibold">Subsection content</label>
+              <div className="md:col-span-12">
+                <label className="mb-2 block text-sm font-semibold text-slate-700">Subsection content</label>
                 <textarea
                   rows="6"
                   name="subsection_content"
                   placeholder="Write subsection explanation"
                   value={subsectionDraft.subsection_content}
                   onChange={handleSubsectionDraftChange}
-                  className="form-control"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
                 />
               </div>
             </div>
 
-            <div className="d-flex flex-wrap gap-2 mt-3">
+            <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={handleAddSubsection}
@@ -248,18 +248,18 @@ export default function AddSections() {
             </div>
 
             {sections.subsections.length > 0 && (
-              <div className="mt-4 d-flex flex-column gap-3">
+              <div className="mt-4 flex flex-col gap-3">
                 {sections.subsections.map((subsection, index) => (
                   <div
                     key={`${subsection.subsection_name}-${index}`}
-                    className="rounded-4 border bg-white p-3"
+                    className="rounded-[2rem] border bg-white p-3 transition-all duration-200"
                   >
-                    <div className="d-flex justify-content-between align-items-start gap-3">
+                    <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="fw-semibold">
+                        <div className="font-semibold text-slate-900">
                           {subsection.subsection_name || `Subsection ${index + 1}`}
                         </div>
-                        <div className="text-muted small">
+                        <div className="text-sm text-slate-500">
                           Order: {subsection.order || index + 1}
                         </div>
                       </div>
@@ -272,7 +272,10 @@ export default function AddSections() {
                       </button>
                     </div>
                     {subsection.subsection_content && (
-                      <p className="text-muted mb-0 mt-2" style={{ whiteSpace: "pre-line" }}>
+                      <p
+                        className="mt-2 text-slate-500"
+                        style={{ whiteSpace: "pre-line" }}
+                      >
                         {subsection.subsection_content}
                       </p>
                     )}
@@ -282,7 +285,7 @@ export default function AddSections() {
             )}
           </div>
 
-          <div className="d-flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             <button type="submit" className="btn btn-primary w-full px-4 sm:w-auto">
               Add Section
             </button>

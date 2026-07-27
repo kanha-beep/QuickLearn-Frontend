@@ -26,10 +26,10 @@ export default function ChapterList({
 
   return (
     <div className="rounded">
-      <div className="d-flex">
+      <div className="flex flex-wrap">
         {chapters.map((c) => (
-          <div key={c._id} className="rounded my-2 d-flex">
-            <div className="col-3">
+          <div key={c._id} className="my-2 flex rounded">
+            <div className="w-[12rem] max-w-full">
               <ChapterNameButton
                 c={c}
                 handleSections={handleSections}
@@ -37,11 +37,11 @@ export default function ChapterList({
               />
             </div>
             <div
-              className="row rounded d-flex justify-content-end"
+              className="flex w-[20rem] justify-end gap-2 rounded"
               style={{ width: "20rem" }}
             >
               {isAdmin && (
-                <div className="col-2">
+                <div>
                   <EditSingleChapterButton
                     navigate={navigate}
                     subjectId={subjectId}
@@ -51,12 +51,12 @@ export default function ChapterList({
                 </div>
               )}
               {isAdmin && (
-                <div className="col-2">
+                <div>
                   <DeleteChapterButton chapter={c} subjectId={subjectId} />
                 </div>
               )}
               {isAdmin && (
-                <div className="col-2">
+                <div>
                   <AddSectionButton
                     navigate={navigate}
                     c={c}

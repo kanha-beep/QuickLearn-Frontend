@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "motion/react";
 import { api } from "../../api.js";
 import { Loading } from "../Components/Loading.jsx";
 import {
@@ -32,216 +33,265 @@ function AdminDashboard({ analytics, classes, navigate }) {
   const studentSnapshots = analytics?.studentSnapshots || [];
   const curriculumMap = analytics?.curriculumMap || [];
   const weakChapters = overview.weakChapters || [];
+  const [view, setView] = useState("");
 
   return (
-    <div className="space-y-4">
-      <section className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,_#ecfccb,_#ffffff_45%,_#eff6ff)] p-5 shadow-sm">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+    <div className="flex">
+      <div className="left w-[15%] flex flex-col bg-black rounded-2xl h-[22rem]">
+        <button
+          onClick={() => navigate("/add-class")}
+          className="classes m-2 hover:border-b px-3 py-2 text-white font-semibold transition-colors hover:bg-slate-700 hover:font-light rounded-full flex gap-2 items-center"
+        >
+          <Plus className="h-4 w-4" />
+          Class
+        </button>
+        <button
+          onClick={downloadReport}
+          className="text-white hover:bg-slate-700 px-3 py-2 hover:border-b rounded-full m-2 text-start font-semibold flex gap-2 items-center"
+        >
+          <Download className="h-4 w-4" />
+          Download Report
+        </button>
+        <button className="classes m-2 hover:border-b px-3 py-2 text-white font-semibold transition-colors hover:bg-slate-700 hover:font-light rounded-full flex gap-2 items-center">
+          <Plus className="h-4 w-4" />
+          Sections
+        </button>
+        <div
+          onClick={() => setView("class-mgmt")}
+          className="classes m-2 hover:border-b px-3 py-2 text-white font-semibold transition-colors hover:bg-slate-700 hover:font-light rounded-full"
+        >
+          Class Management
+        </div>
+        <div className="classes m-2 hover:border-b px-3 py-2 text-white font-semibold transition-colors hover:bg-slate-700 hover:font-light rounded-full">
+          Tests
+        </div>
+        <div
+          onClick={() => setView("all-chapters")}
+          className="classes m-2 hover:border-b px-3 py-2 text-white font-semibold transition-colors hover:bg-slate-700 hover:font-light rounded-full"
+        >
+          All Chapters
+        </div>
+      </div>
+      <div className="right w-[85%] ml-2">
+        {/* {" "}
+        <section className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,_#ecfccb,_#ffffff_45%,_#eff6ff)] p-2 hover:shadow-sm">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+                Teacher Analytics
+              </p>
+              <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-900">
+                Recruiter-ready command center
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm text-slate-600">
+                Monitor weak chapters, class coverage, student momentum, and
+                curriculum health from one place.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => navigate("/add-class")}
+                className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                <Plus className="h-4 w-4" />
+                Add Class
+              </button>
+              <button
+                type="button"
+                onClick={downloadReport}
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                <Download className="h-4 w-4" />
+                Download qwsd
+              </button>
+            </div>
+          </div>
+        </section> */}
+        <section className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <article className={metricCardClass}>
+            <p className="text-sm font-semibold text-slate-600">
+              Total Submissions
+            </p>
+            <p className="mt-3 text-3xl font-bold text-slate-900">
+              {overview.totalSubmissions || 0}
+            </p>
+          </article>
+          <article className={metricCardClass}>
+            <p className="text-sm font-semibold text-slate-600">
+              Active Students
+            </p>
+            <p className="mt-3 text-3xl font-bold text-slate-900">
+              {overview.activeStudents || 0}
+            </p>
+          </article>
+          <article className={metricCardClass}>
+            <p className="text-sm font-semibold text-slate-600">
+              Tracked Chapters
+            </p>
+            <p className="mt-3 text-3xl font-bold text-slate-900">
+              {chapterPerformance.length}
+            </p>
+          </article>
+        </section>
+        {view === "class-mgmt" && (
+          <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 className="text-xl font-bold text-slate-900">
+              Class management
+            </h2>
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {classes.map((cl) => (
+                <article
+                  key={cl._id}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    {cl?.class_name}
+                  </h3>
+                  <p className="mt-1 text-xs text-slate-500">ID: {cl?._id}</p>
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                    <button
+                      onClick={() => navigate(`/${cl._id}`)}
+                      className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 transition hover:bg-white"
+                    >
+                      Open Class
+                    </button>
+                    <button
+                      onClick={() => navigate(`/${cl._id}/add-subject`)}
+                      className="rounded-lg border border-blue-200 px-3 py-2 text-sm text-blue-700 transition hover:bg-blue-50"
+                    >
+                      Add Subject
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+        {view === "all-chapters" && (
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-              Teacher Analytics
-            </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-900">
-              Recruiter-ready command center
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-600">
-              Monitor weak chapters, class coverage, student momentum, and
-              curriculum health from one place.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => navigate("/add-class")}
-              className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-            >
-              <Plus className="h-4 w-4" />
-              Add Class
-            </button>
-            <button
-              type="button"
-              onClick={downloadReport}
-              className="inline-flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-            >
-              <Download className="h-4 w-4" />
-              Download Report
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        <article className={metricCardClass}>
-          <p className="text-sm font-semibold text-slate-600">
-            Total Submissions
-          </p>
-          <p className="mt-3 text-3xl font-bold text-slate-900">
-            {overview.totalSubmissions || 0}
-          </p>
-        </article>
-        <article className={metricCardClass}>
-          <p className="text-sm font-semibold text-slate-600">
-            Active Students
-          </p>
-          <p className="mt-3 text-3xl font-bold text-slate-900">
-            {overview.activeStudents || 0}
-          </p>
-        </article>
-        <article className={metricCardClass}>
-          <p className="text-sm font-semibold text-slate-600">
-            Tracked Chapters
-          </p>
-          <p className="mt-3 text-3xl font-bold text-slate-900">
-            {chapterPerformance.length}
-          </p>
-        </article>
-      </section>
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-900">Class management</h2>
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {classes.map((cl) => (
-            <article
-              key={cl._id}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-            >
-              <h3 className="text-lg font-semibold text-slate-900">
-                {cl?.class_name}
-              </h3>
-              <p className="mt-1 text-xs text-slate-500">ID: {cl?._id}</p>
-              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                <button
-                  onClick={() => navigate(`/${cl._id}`)}
-                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 transition hover:bg-white"
-                >
-                  Open Class
-                </button>
-                <button
-                  onClick={() => navigate(`/${cl._id}/add-subject`)}
-                  className="rounded-lg border border-blue-200 px-3 py-2 text-sm text-blue-700 transition hover:bg-blue-50"
-                >
-                  Add Subject
-                </button>
+            <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 className="text-xl font-bold text-slate-900">
+                  Lowest performing chapters
+                </h2>
+                <div className="mt-4 space-y-3">
+                  {weakChapters.map((item) => (
+                    <article
+                      key={item.chapterId}
+                      className="rounded-2xl border border-rose-200 bg-rose-50 p-4"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {item.chapterName}
+                          </p>
+                          <p className="text-xs text-slate-600">
+                            {item.className} • {item.subjectName}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-rose-700">
+                            {item.accuracy}%
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {item.attempts} attempts
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
               </div>
-            </article>
-          ))}
-        </div>
-      </section>
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900">
-            Lowest performing chapters
-          </h2>
-          <div className="mt-4 space-y-3">
-            {weakChapters.map((item) => (
-              <article
-                key={item.chapterId}
-                className="rounded-2xl border border-rose-200 bg-rose-50 p-4"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {item.chapterName}
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      {item.className} • {item.subjectName}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xl font-bold text-rose-700">
-                      {item.accuracy}%
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {item.attempts} attempts
-                    </p>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900">Student momentum</h2>
-          <div className="mt-4 space-y-3">
-            {studentSnapshots.map((item) => (
-              <article
-                key={item.userId}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-slate-900">
-                      {item.studentName}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      Last active{" "}
-                      {item.lastActiveAt
-                        ? new Date(item.lastActiveAt).toLocaleDateString()
-                        : "No activity"}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-slate-900">
-                      {item.averageAccuracy}%
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {item.attempts} attempts
-                    </p>
-                  </div>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 className="text-xl font-bold text-slate-900">
+                  Student momentum
+                </h2>
+                <div className="mt-4 space-y-3">
+                  {studentSnapshots.map((item) => (
+                    <article
+                      key={item.userId}
+                      className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-slate-900">
+                            {item.studentName}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            Last active{" "}
+                            {item.lastActiveAt
+                              ? new Date(item.lastActiveAt).toLocaleDateString()
+                              : "No activity"}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-slate-900">
+                            {item.averageAccuracy}%
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {item.attempts} attempts
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
                 </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-900">Curriculum map</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Class → subject → chapter → section → test coverage
-        </p>
-        <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
-          {curriculumMap.map((classRoom) => (
-            <article
-              key={classRoom._id}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-            >
-              <h3 className="text-lg font-semibold text-slate-900">
-                {classRoom.class_name}
-              </h3>
-              <div className="mt-3 space-y-3">
-                {classRoom.subjects.map((subject) => (
-                  <div
-                    key={subject._id}
-                    className="rounded-2xl border border-slate-200 bg-white p-3"
+              </div>
+            </section>
+            <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h2 className="text-xl font-bold text-slate-900">
+                Curriculum map
+              </h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Class → subject → chapter → section → test coverage
+              </p>
+              <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+                {curriculumMap.map((classRoom) => (
+                  <article
+                    key={classRoom._id}
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
                   >
-                    <p className="font-semibold text-slate-800">
-                      {subject.subject_name}
-                    </p>
-                    <div className="mt-2 space-y-2">
-                      {subject.chapters.map((chapter) => (
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      {classRoom.class_name}
+                    </h3>
+                    <div className="mt-3 space-y-3">
+                      {classRoom.subjects.map((subject) => (
                         <div
-                          key={chapter._id}
-                          className="rounded-xl bg-slate-50 p-3"
+                          key={subject._id}
+                          className="rounded-2xl border border-slate-200 bg-white p-3"
                         >
-                          <p className="text-sm font-semibold text-slate-800">
-                            {chapter.chapter_name} • {chapter.tests} tests
+                          <p className="font-semibold text-slate-800">
+                            {subject.subject_name}
                           </p>
-                          <p className="mt-1 text-xs text-slate-500">
-                            {chapter.sections
-                              .map((section) => section.section_name)
-                              .join(", ") || "No sections yet"}
-                          </p>
+                          <div className="mt-2 space-y-2">
+                            {subject.chapters.map((chapter) => (
+                              <div
+                                key={chapter._id}
+                                className="rounded-xl bg-slate-50 p-3"
+                              >
+                                <p className="text-sm font-semibold text-slate-800">
+                                  {chapter.chapter_name} • {chapter.tests} tests
+                                </p>
+                                <p className="mt-1 text-xs text-slate-500">
+                                  {chapter.sections
+                                    .map((section) => section.section_name)
+                                    .join(", ") || "No sections yet"}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </article>
                 ))}
               </div>
-            </article>
-          ))}
-        </div>
-      </section>
+            </section>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -474,7 +524,7 @@ export default function DashboardPage({ userRoles = "" }) {
   if (loading) return <Loading loading={loading} />;
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-5 sm:py-5">
+    <div className="mx-auto w-full px-3 py-3 sm:px-5 sm:py-5 ">
       {isAdmin ? (
         <AdminDashboard
           analytics={teacherAnalytics}

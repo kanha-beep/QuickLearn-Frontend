@@ -1,10 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
+import { motion } from "motion/react";
+
+const menuItems = ["Home", "Profile", "Settings"];
+const chatRows = [1, 2, 3];
 
 export default function ProfilePage() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
-    <div className="container-fluid ms-3">
-      <h1>Profile Page</h1>
-      <div className="row" style={{ height: "40rem" }}>
+    <div className="ml-3">
+      <h1 className="mb-4 text-2xl font-semibold text-slate-900">Profile Page</h1>
+      <div className="grid h-[40rem] grid-cols-12 gap-4">
         {/* 1st div navbar left side */}
         <div className="col-1 border rounded" style={{margin:"0 -2rem"}}>
           {/* toggle button */}

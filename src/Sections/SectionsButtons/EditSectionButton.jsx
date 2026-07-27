@@ -16,7 +16,7 @@ export function EditSectionButton({ navigate, section, subjectId, classId }) {
             },
           )
         }
-        className="btn btn-outline-secondary btn-sm me-2"
+        className="btn btn-outline-secondary btn-sm mr-2"
       >
         <span className="bi bi-pencil fs-7"></span>
       </button>

@@ -20,7 +20,8 @@ export function AddSectionButton({ navigate, c, classId, subjectId, subjectName 
     <>
       <select
         onChange={handleChange}
-        className="btn form-select-sm btn-outline-info btn-sm w-25"
+        defaultValue=""
+        className="w-24 rounded-md border border-cyan-200 bg-cyan-50 px-2 py-1.5 text-sm font-medium text-cyan-700 outline-none transition-all duration-200 hover:bg-cyan-100 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100"
       >
         <option value="">+</option>
         <option value="sections">Section</option>

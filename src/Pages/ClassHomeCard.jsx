@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { motion } from "motion/react";
 
 export default function ClassHomeCard({ subject, navigate, index = 0 }) {
   const hue = index % 3;

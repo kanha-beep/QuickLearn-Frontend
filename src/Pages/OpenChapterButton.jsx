@@ -1,5 +1,6 @@
 import React from "react";
 import { ArrowRight } from "lucide-react";
+import { motion } from "motion/react";
 
 export function OpenChapterButton({ navigate, subject, classId }) {
   return (

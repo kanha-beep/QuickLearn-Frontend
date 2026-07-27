@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { motion } from "motion/react";
 import { api } from "../../api.js";
 import { getStoredUser } from "../auth.js";
 
