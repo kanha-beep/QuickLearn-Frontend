@@ -545,7 +545,7 @@ export default function SubjectPage() {
                 </div>
               </div>
               {/* got the expalantion actual div box */}
-              <div className="rounded-2xl border border-slate-200 p-3 shadow-sm bg-red-400 sm:bg-yellow-400  col-span-1">
+              <div className="rounded-2xl border border-slate-200 p-3 shadow-sm  col-span-1">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div className="text-sm font-semibold text-slate-700">
                     Explanation
