@@ -95,7 +95,7 @@ export default function Navbar() {
               className="rounded-lg border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50 sm:px-4"
               onClick={() => navigate("/dashboard")}
             >
-              {isAdmin ? "Dashboard" : "Plan"}
+              {isAdmin ? "Dashboard" : null}
             </button>
           )}
           {!isLoggedIn ? (
