@@ -90,12 +90,12 @@ export default function Navbar() {
               News
             </button>
           )}
-          {isLoggedIn && (
+          {isLoggedIn && isAdmin && (
             <button
               className="rounded-lg border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50 sm:px-4"
               onClick={() => navigate("/dashboard")}
             >
-              {isAdmin ? "Dashboard" : null}
+              Dashboard
             </button>
           )}
           {!isLoggedIn ? (
