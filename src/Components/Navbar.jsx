@@ -1,7 +1,12 @@
 import { GraduationCap } from "lucide-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../../api.js";
-import { clearAuthSession, getStoredRole, getStoredToken, getStoredUser } from "../auth.js";
+import {
+  clearAuthSession,
+  getStoredRole,
+  getStoredToken,
+  getStoredUser,
+} from "../auth.js";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -47,8 +52,8 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-200 bg-black backdrop-blur">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-col items-start">
+      <div className="mx-auto flex w-full flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:justify-between">
+        <div className="flex justify-between lg:w-[60%] md:w-[60%] ">
           <button
             onClick={() => navigate("/")}
             className="inline-flex items-center gap-2 rounded-lg border border-slate-200 text-black bg-white px-3 py-2 text-sm font-semibold shadow-sm transition hover:border-blue-500 hover:text-blue-600"
@@ -59,19 +64,6 @@ export default function Navbar() {
           {/* <span className="mt-1 text-xs font-medium text-white">
             Your Learning Companion
           </span> */}
-        </div>
-        <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:flex-none md:justify-end">
-          {searchEnabled && (
-            <div className="w-full md:w-[9.5rem] md:flex-none">
-              <input
-                type="text"
-                value={searchValue}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder={searchPlaceholder}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100"
-              />
-            </div>
-          )}
           <button
             className="rounded-lg border border-cyan-200 px-3 py-2 text-sm font-medium text-cyan-700 transition hover:bg-cyan-50 sm:px-4"
             onClick={() => navigate("/contact")}
@@ -81,7 +73,9 @@ export default function Navbar() {
           {isLoggedIn && (
             <button
               className="rounded-lg border border-sky-200 px-3 py-2 text-sm font-medium text-sky-700 transition hover:bg-sky-50 sm:px-4"
-              onClick={() => window.open(blogUrl, "_blank", "noopener,noreferrer")}
+              onClick={() =>
+                window.open(blogUrl, "_blank", "noopener,noreferrer")
+              }
             >
               Blog
             </button>
@@ -89,7 +83,9 @@ export default function Navbar() {
           {isLoggedIn && (
             <button
               className="rounded-lg border border-violet-200 px-3 py-2 text-sm font-medium text-violet-700 transition hover:bg-violet-50 sm:px-4"
-              onClick={() => window.open(newsUrl, "_blank", "noopener,noreferrer")}
+              onClick={() =>
+                window.open(newsUrl, "_blank", "noopener,noreferrer")
+              }
             >
               News
             </button>
@@ -116,7 +112,10 @@ export default function Navbar() {
                 try {
                   await api.post("/api/auth/logout");
                 } catch (error) {
-                  console.error("Logout request failed:", error?.response?.data || error);
+                  console.error(
+                    "Logout request failed:",
+                    error?.response?.data || error,
+                  );
                 } finally {
                   clearAuthSession();
                 }
@@ -126,6 +125,19 @@ export default function Navbar() {
             >
               Logout
             </button>
+          )}
+        </div>
+        <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:flex-none md:justify-end">
+          {searchEnabled && (
+            <div className="w-full md:w-[9.5rem] md:flex-none">
+              <input
+                type="text"
+                value={searchValue}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder={searchPlaceholder}
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100"
+              />
+            </div>
           )}
         </div>
       </div>

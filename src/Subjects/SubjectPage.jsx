@@ -156,7 +156,7 @@ export default function SubjectPage() {
         activeSubsectionId,
     ) || null;
   const hasSubsections = sectionSubsections.length > 0;
-  const layoutClass = "grid-cols-2 lg:grid-cols-4";
+  const layoutClass = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
   const actionRowClass = "mt-2 flex flex-wrap items-center gap-2";
 
   const handleDeleteSection = async (sectionId) => {
@@ -310,10 +310,10 @@ export default function SubjectPage() {
         damping: 15,
       }}
     >
-      <div className="mx-auto w-full max-w-[95%]  pt-3 text-slate-900 h-[43rem]">
+      <div className="mx-auto h-[43rem] w-full max-w-[95%] pt-3 text-slate-900">
         {/* chapters list */}
-        <section className={`grid items-start gap-2 ${layoutClass} h-[90%]`}>
-          <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm h-full">
+        <section className={`grid grid-cols-4 items-start gap-2 ${layoutClass} h-[90%]`}>
+          <div className="h-full rounded-2xl border border-slate-200 p-3 shadow-sm sm:col-span-1 col-span-2 bg-white/80 overflow-auto subject-scrollbar">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div className="text-sm font-semibold text-slate-700">
                 Chapters
@@ -329,7 +329,7 @@ export default function SubjectPage() {
               )}
             </div>
 
-            <div className="space-y-2 overflow-auto pr-1 lg:pr-">
+            <div className="space-y-2 overflow-auto pr-1 lg:pr-0">
               {filteredChapters.map((chapter) => {
                 const isActive = activeChapterId === chapter._id;
                 return (
@@ -390,11 +390,19 @@ export default function SubjectPage() {
               })}
             </div>
           </div>
-          {/* sections list*/}
-          <div className="h-full rounded-2xl border border-slate-200 bg-white px-2 py-3 shadow-sm overflow-auto subject-scrollbar">
+          {/* sections list actual div*/}
+          <div className="h-full rounded-2xl border border-slate-200  px-2 py-3 sm:col-span-1 bg-white/80 col-span-2 shadow-sm overflow-auto subject-scrollbar">
             <div className="mb-3 text-sm font-semibold text-slate-700">
               Sections
             </div>
+            <motion.div
+            key={`${activeChapterId}-${visibleSections.length}`}
+            initial={{opacity:0, y:50}}
+            animate={{opacity:1, y:0}}
+            transition={{duration:0.65, delay:0.1, ease:"easeInOut"}}
+            >
+
+            
             <div className="space-y-2 overflow-y-auto pr-1 lg:pr-0">
               {visibleSections.map((section) => {
                 const isActive = activeSectionId === section._id;
@@ -463,11 +471,12 @@ export default function SubjectPage() {
                 );
               })}
             </div>
+            </motion.div>
           </div>
 
           {selectedSection && hasSubsections ? (
             <>
-              <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm overflow-auto subject-scrollbar">
+              <div className="rounded-2xl border border-slate-200  bg-white/80 p-3 shadow-sm overflow-auto subject-scrollbar">
                 <div className="mb-3 text-sm font-semibold text-slate-700">
                   Subsections
                 </div>
@@ -536,7 +545,7 @@ export default function SubjectPage() {
                 </div>
               </div>
               {/* got the expalantion actual div box */}
-              <div className="rounded-2xl border border-slate-200 bg-black p-3 shadow-sm">
+              <div className="rounded-2xl border border-slate-200 p-3 shadow-sm bg-red-400 sm:bg-yellow-400  col-span-1">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div className="text-sm font-semibold text-slate-700">
                     Explanation
@@ -632,14 +641,14 @@ export default function SubjectPage() {
             </>
           ) : (
             <>
-              <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div className="rounded-2xl border border-slate-200 bg-white/80 p-3 col-span-2 shadow-sm sm:col-span-1">
                 <div className="mb-3 text-sm font-semibold text-slate-700">
                   Subsections
                 </div>
                 <p className="text-sm text-slate-500">Coming soon</p>
               </div>
               {/* got the actual div explanation */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm h-full overflow-auto subject-scrollbar">
+              <div className="h-full rounded-2xl border border-slate-200 col-span-2 sm:col-span-1 p-3 shadow-sm overflow-auto subject-scrollbar">
                 <div className="mb-3 text-sm font-semibold text-slate-700">
                   Explanation
                 </div>

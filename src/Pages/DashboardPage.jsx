@@ -37,7 +37,7 @@ function AdminDashboard({ analytics, classes, navigate }) {
 
   return (
     <div className="flex">
-      <div className="left w-[15%] flex flex-col bg-black rounded-2xl h-[22rem]">
+      <div className="left w-[15%] flex flex-col bg-black rounded-2xl h-[15rem]">
         <button
           onClick={() => navigate("/add-class")}
           className="classes m-2 hover:border-b px-3 py-2 text-white font-semibold transition-colors hover:bg-slate-700 hover:font-light rounded-full flex gap-2 items-center"
@@ -52,19 +52,19 @@ function AdminDashboard({ analytics, classes, navigate }) {
           <Download className="h-4 w-4" />
           Download Report
         </button>
-        <button className="classes m-2 hover:border-b px-3 py-2 text-white font-semibold transition-colors hover:bg-slate-700 hover:font-light rounded-full flex gap-2 items-center">
+        {/* <button className="classes m-2 hover:border-b px-3 py-2 text-white font-semibold transition-colors hover:bg-slate-700 hover:font-light rounded-full flex gap-2 items-center">
           <Plus className="h-4 w-4" />
           Sections
-        </button>
+        </button> */}
         <div
           onClick={() => setView("class-mgmt")}
           className="classes m-2 hover:border-b px-3 py-2 text-white font-semibold transition-colors hover:bg-slate-700 hover:font-light rounded-full"
         >
           Class Management
         </div>
-        <div className="classes m-2 hover:border-b px-3 py-2 text-white font-semibold transition-colors hover:bg-slate-700 hover:font-light rounded-full">
+        {/* <div className="classes m-2 hover:border-b px-3 py-2 text-white font-semibold transition-colors hover:bg-slate-700 hover:font-light rounded-full">
           Tests
-        </div>
+        </div> */}
         <div
           onClick={() => setView("all-chapters")}
           className="classes m-2 hover:border-b px-3 py-2 text-white font-semibold transition-colors hover:bg-slate-700 hover:font-light rounded-full"
