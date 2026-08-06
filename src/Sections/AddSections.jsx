@@ -241,7 +241,7 @@ export default function AddSections() {
               <button
                 type="button"
                 onClick={handleAddSubsection}
-                className="btn btn-outline-primary w-full sm:w-auto"
+                className="btn btn-outline-primary w-full sm:w-auto sticky"
               >
                 Add Subsection
               </button>

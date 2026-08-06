@@ -53,8 +53,8 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-200 bg-gray-800 backdrop-blur">
-      <div className="mx-auto flex w-full flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:justify-between">
-        <div className="flex justify-between lg:w-[25%] md:w-[60%] w-[22rem]">
+      <div className="mx-auto flex w-full flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:justify-between ">
+        <div className="flex justify-between lg:w-[35%] md:w-[60%] w-[22rem]">
           <button
             onClick={() => navigate("/")}
             className="inline-flex items-center gap-2 rounded-lg border border-slate-200 text-black bg-white p-2 text-sm font-semibold shadow-sm transition hover:border-blue-500 hover:text-blue-600"
