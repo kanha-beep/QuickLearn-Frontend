@@ -364,7 +364,7 @@ export default function SubjectPage() {
                       }}
                       className="w-full break-words text-left text-base font-semibold text-slate-800"
                     >
-                      <span className="inline-flex w-8 shrink-0 text-xs text-slate-500 sm:mr-5">
+                      <span className="inline-flex w-4 shrink-0 text-xs text-slate-500 sm:mr-5">
                         {chapter.order}
                       </span>
                       {chapter.chapter_name}
