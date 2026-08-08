@@ -317,10 +317,10 @@ export default function SubjectPage() {
         damping: 15,
       }}
     >
-      <div className="mx-auto h-[43rem] w-full max-w-[95%] pt-3 text-slate-900">
+      <div className="mx-auto h-[43rem] w-full max-w-[95%] pt-1 lg:mt-[2rem]  text-slate-900">
         {/* chapters list */}
         <section className={`grid grid-cols-4 items-start gap-2 ${layoutClass} h-[90%]`}>
-          <div className="h-full rounded-2xl border border-slate-200 p-3 shadow-sm sm:col-span-1 col-span-2 bg-white/80 overflow-auto subject-scrollbar">
+          <div className="h-full rounded-2xl border border-slate-200 px-2 py-3 shadow-sm sm:col-span-1 col-span-2 bg-white/80 overflow-auto subject-scrollbar">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div className="text-sm font-semibold text-slate-700">
                 Chapters
@@ -451,7 +451,7 @@ export default function SubjectPage() {
                       }`}
                     >
                       <span
-                        className={`inline-flex w-8 shrink-0 text-xs ${
+                        className={`inline-flex w-4 shrink-0 text-xs ${
                           isActive ? "text-slate-500" : "text-slate-500"
                         }`}
                       >
@@ -484,11 +484,11 @@ export default function SubjectPage() {
           {selectedSection && hasSubsections ? (
             <>
             {/* actual div subsections */}
-              <div className="rounded-2xl border border-slate-200 bg-white/80 p-3 shadow-sm overflow-auto subject-scrollbar">
+              <div className="rounded-2xl border border-slate-200 bg-white/80 px-2 py-3 sm:col-span-1 col-span-2 shadow-sm h-full overflow-auto subject-scrollbar">
                 <div className="mb-3 text-sm font-semibold text-slate-700">
                   Subsections
                 </div>
-                <div className="h-full space-y-2 overflow-y-auto pr-1 lg:pr-0">
+                <div className="h-full space-y-2 pr-1 lg:pr-0">
                   {sectionSubsections.map((subsection, index) => {
                     const subsectionKey = buildSubsectionKey(
                       selectedSection._id,
@@ -518,7 +518,7 @@ export default function SubjectPage() {
                           }}
                           className="w-full text-left break-words"
                         >
-                          <span className="inline-flex w-8 shrink-0 text-xs text-slate-500">
+                          <span className="inline-flex w-4 shrink-0 text-xs text-slate-500">
                             {subsection.order ?? index}
                           </span>
                           {subsection.subsection_name}
@@ -553,7 +553,7 @@ export default function SubjectPage() {
                 </div>
               </div>
               {/* got the expalantion actual div box */}
-              <div className="h-full rounded-2xl border border-slate-200 p-3 shadow-sm col-span-1 overflow-auto subject-scrollbar">
+              <div className="h-full rounded-2xl border border-slate-200 p-3 shadow-sm sm:col-span-1 col-span-2 overflow-auto subject-scrollbar">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div className="text-sm font-semibold text-slate-700">
                     Explanation
