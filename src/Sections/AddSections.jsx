@@ -237,11 +237,11 @@ export default function AddSections() {
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="sticky top-2 z-20 mt-3 flex flex-wrap gap-2 rounded-xl bg-slate-50/95 py-2 backdrop-blur-sm">
               <button
                 type="button"
                 onClick={handleAddSubsection}
-                className="btn btn-outline-primary w-full sm:w-auto sticky"
+                className="btn btn-outline-primary w-full sm:w-auto"
               >
                 Add Subsection
               </button>

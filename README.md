@@ -9,7 +9,7 @@ The frontend is intended to call the dedicated Java backend in `../java-server`.
 Set:
 
 ```bash
-VITE_JAVA_API_URL=http://localhost:3000
+VITE_API_URL=http://localhost:3000
 ```
 
 All app requests use `api.js`, which forwards:

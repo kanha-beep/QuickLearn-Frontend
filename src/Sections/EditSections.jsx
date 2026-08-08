@@ -24,7 +24,14 @@ export default function EditSections() {
   });
   useEffect(() => {
     const getSectionData = async () => {
-      GetSection(api, subjectId, chapterId, sectionId, setSectionData, setOrder);
+      GetSection(
+        api,
+        subjectId,
+        chapterId,
+        sectionId,
+        setSectionData,
+        setOrder,
+      );
     };
     getSectionData();
   }, [chapterId, sectionId, subjectId]);
@@ -38,7 +45,7 @@ export default function EditSections() {
       sectionData,
       navigate,
       classId,
-      order
+      order,
     );
     console.log("section updated");
   };
@@ -68,7 +75,9 @@ export default function EditSections() {
   const handleRemoveSubsection = (indexToDelete) => {
     setSectionData((prev) => ({
       ...prev,
-      subsections: prev.subsections.filter((_, index) => index !== indexToDelete),
+      subsections: prev.subsections.filter(
+        (_, index) => index !== indexToDelete,
+      ),
     }));
   };
 
@@ -83,7 +92,9 @@ export default function EditSections() {
             <span className="mb-2 inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
               Edit Section
             </span>
-            <h1 className="mb-1 text-3xl font-semibold text-slate-900">Update section details</h1>
+            <h1 className="mb-1 text-3xl font-semibold text-slate-900">
+              Update section details
+            </h1>
             <p className="text-slate-500">
               Keep the section and its subsections in one place.
             </p>
@@ -91,7 +102,9 @@ export default function EditSections() {
           <button
             type="button"
             className="btn btn-outline-secondary w-full md:w-auto"
-            onClick={() => navigate(`/${classId}/subjects/${subjectId}/chapters`)}
+            onClick={() =>
+              navigate(`/${classId}/subjects/${subjectId}/chapters`)
+            }
           >
             Back to Subject
           </button>
@@ -100,7 +113,9 @@ export default function EditSections() {
         <form onSubmit={handleContentUpdate} className="flex flex-col gap-4">
           <div className="grid gap-3 md:grid-cols-12">
             <div className="md:col-span-3">
-              <label className="mb-2 block text-sm font-semibold text-slate-700">Order</label>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Order
+              </label>
               <input
                 type="number"
                 placeholder="1"
@@ -110,7 +125,9 @@ export default function EditSections() {
               />
             </div>
             <div className="md:col-span-9">
-              <label className="mb-2 block text-sm font-semibold text-slate-700">Section name</label>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Section name
+              </label>
               <input
                 placeholder="Section Name"
                 name="sectionName"
@@ -120,7 +137,9 @@ export default function EditSections() {
               />
             </div>
             <div className="md:col-span-12">
-              <label className="mb-2 block text-sm font-semibold text-slate-700">Section content</label>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Section content
+              </label>
               <textarea
                 rows="12"
                 placeholder={
@@ -136,41 +155,58 @@ export default function EditSections() {
               />
               {sectionData.subsections.length > 0 && (
                 <p className="mt-2 text-sm text-slate-500">
-                  This section has subsections, so the main section content stays empty.
+                  This section has subsections, so the main section content
+                  stays empty.
                 </p>
               )}
             </div>
           </div>
 
-          <div className="rounded-[2rem] p-3 md:p-4" style={{ background: "#f8fafc" }}>
+          <div
+            className="rounded-[2rem] p-3 md:p-4"
+            style={{ background: "#f8fafc" }}
+          >
             <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="mb-1 text-xl font-semibold text-slate-900">Subsections</h2>
+                <h2 className="mb-1 text-xl font-semibold text-slate-900">
+                  Subsections
+                </h2>
                 <p className="text-slate-500">
                   Edit the nested points that belong to this section.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleAddSubsection}
-                className="btn btn-sm btn-outline-primary w-full md:w-auto"
-              >
-                Add Subsection
-              </button>
+            </div>
+
+            <div className="sticky top-20 z-20 mb-3 flex justify-end rounded-xl bg-slate-50/95 py-2 backdrop-blur-sm">
+            
+                <button
+                  type="button"
+                  onClick={handleAddSubsection}
+                  className="btn btn-sm btn-outline-primary w-full md:w-auto"
+                >
+                  Add Subsection
+                </button>
+             
             </div>
 
             {sectionData.subsections.length === 0 && (
               <div className="rounded-[2rem] border border-dashed bg-white p-3 text-slate-500">
-                No subsections yet. Add one if this section needs smaller topics.
+                No subsections yet. Add one if this section needs smaller
+                topics.
               </div>
             )}
 
             <div className="flex flex-col gap-3">
               {sectionData.subsections.map((subsection, index) => (
-                <div key={index} className="rounded-[2rem] border bg-white p-3 transition-all duration-200">
+                <div
+                  key={index}
+                  className="rounded-[2rem] border bg-white p-3 transition-all duration-200"
+                >
                   <div className="grid gap-3 md:grid-cols-12">
                     <div className="md:col-span-2">
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">Order</label>
+                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                        Order
+                      </label>
                       <input
                         type="number"
                         placeholder="1"
@@ -182,24 +218,36 @@ export default function EditSections() {
                       />
                     </div>
                     <div className="md:col-span-10">
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">Subsection name</label>
+                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                        Subsection name
+                      </label>
                       <input
                         placeholder="Subsection Name"
                         value={subsection.subsection_name}
                         onChange={(e) =>
-                          handleSubsectionChange(index, "subsection_name", e.target.value)
+                          handleSubsectionChange(
+                            index,
+                            "subsection_name",
+                            e.target.value,
+                          )
                         }
                         className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
                       />
                     </div>
                     <div className="md:col-span-12">
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">Subsection content</label>
+                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                        Subsection content
+                      </label>
                       <textarea
                         rows="2"
                         placeholder="Subsection Content"
                         value={subsection.subsection_content}
                         onChange={(e) =>
-                          handleSubsectionChange(index, "subsection_content", e.target.value)
+                          handleSubsectionChange(
+                            index,
+                            "subsection_content",
+                            e.target.value,
+                          )
                         }
                         className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
                       />
@@ -220,7 +268,9 @@ export default function EditSections() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <button className="btn btn-success w-full px-4 sm:w-auto">Save</button>
+            <button className="btn btn-success w-full px-4 sm:w-auto">
+              Save
+            </button>
           </div>
         </form>
       </div>

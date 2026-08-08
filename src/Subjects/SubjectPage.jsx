@@ -137,6 +137,13 @@ export default function SubjectPage() {
       return;
     }
 
+    if (!activeSubsectionId) {
+      setActiveSubsectionId(
+        buildSubsectionKey(selectedSection?._id, sectionSubsections[0], 0),
+      );
+      return;
+    }
+
     const activeStillExists = sectionSubsections.some(
       (subsection, index) =>
         (subsection._id || `${selectedSection?._id}-${index}`) ===
@@ -476,11 +483,12 @@ export default function SubjectPage() {
 
           {selectedSection && hasSubsections ? (
             <>
-              <div className="rounded-2xl border border-slate-200  bg-white/80 p-3 shadow-sm overflow-auto subject-scrollbar">
+            {/* actual div subsections */}
+              <div className="rounded-2xl border border-slate-200 bg-white/80 p-3 shadow-sm overflow-auto subject-scrollbar">
                 <div className="mb-3 text-sm font-semibold text-slate-700">
                   Subsections
                 </div>
-                <div className="max-h-[20rem] space-y-2 overflow-y-auto pr-1 lg:pr-0">
+                <div className="h-full space-y-2 overflow-y-auto pr-1 lg:pr-0">
                   {sectionSubsections.map((subsection, index) => {
                     const subsectionKey = buildSubsectionKey(
                       selectedSection._id,
@@ -545,7 +553,7 @@ export default function SubjectPage() {
                 </div>
               </div>
               {/* got the expalantion actual div box */}
-              <div className="rounded-2xl border border-slate-200 p-3 shadow-sm  col-span-1">
+              <div className="h-full rounded-2xl border border-slate-200 p-3 shadow-sm col-span-1 overflow-auto subject-scrollbar">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div className="text-sm font-semibold text-slate-700">
                     Explanation
@@ -641,7 +649,7 @@ export default function SubjectPage() {
             </>
           ) : (
             <>
-              <div className="rounded-2xl border border-slate-200 bg-white/80 p-3 col-span-2 shadow-sm sm:col-span-1">
+              <div className="h-full rounded-2xl border border-slate-200 bg-white/80 p-3 col-span-2 shadow-sm sm:col-span-1">
                 <div className="mb-3 text-sm font-semibold text-slate-700">
                   Subsections
                 </div>

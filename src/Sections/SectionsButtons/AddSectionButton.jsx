@@ -17,7 +17,7 @@ export function AddSectionButton({ navigate, c, classId, subjectId, subjectName 
   };
 
   return (
-    <>
+    <div className="sticky top-3 z-20 self-start rounded-lg bg-white/90 p-1 backdrop-blur-sm">
       <select
         onChange={handleChange}
         defaultValue=""
@@ -27,6 +27,6 @@ export function AddSectionButton({ navigate, c, classId, subjectId, subjectName 
         <option value="sections">Section</option>
         <option value="meanings">Meanings</option>
       </select>
-    </>
+    </div>
   );
 }
