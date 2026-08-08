@@ -109,7 +109,7 @@ export default function SafeRichContent({ content = [], className = "" }) {
           >
             {numberedItem ? (
               <>
-                <span className="mr-3 inline-block min-w-[2.25rem] font-medium text-slate-900">
+                <span className="inline-block w-4 mr-[0.1rem] font-medium text-slate-500">
                   {numberedItem.number}
                 </span>
                 <span>{numberedItem.text}</span>

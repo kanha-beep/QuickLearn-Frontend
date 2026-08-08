@@ -364,8 +364,8 @@ export default function SubjectPage() {
                       }}
                       className="w-full break-words text-left text-base font-semibold text-slate-800"
                     >
-                      <span className="inline-flex w-4 shrink-0 text-xs text-slate-500 sm:mr-5">
-                        {chapter.order}
+                      <span className="inline-flex w-4 shrink-0 text-xs text-slate-500">
+                        {chapter.order} <span>.</span>
                       </span>
                       {chapter.chapter_name}
                     </button>
@@ -455,7 +455,7 @@ export default function SubjectPage() {
                           isActive ? "text-slate-500" : "text-slate-500"
                         }`}
                       >
-                        {section.order}
+                        {section.order}<span>.</span>
                       </span>
                       {section.section_name}
                     </button>
@@ -519,7 +519,7 @@ export default function SubjectPage() {
                           className="w-full text-left break-words"
                         >
                           <span className="inline-flex w-4 shrink-0 text-xs text-slate-500">
-                            {subsection.order ?? index}
+                            {subsection.order ?? index} <span>.</span>
                           </span>
                           {subsection.subsection_name}
                         </button>
