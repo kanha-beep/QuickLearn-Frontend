@@ -105,7 +105,7 @@ export default function Auth({
                 <div className="mb-4 text-center">
                   <i className="fas fa-plane mb-3 text-5xl text-blue-600"></i>
                   <h2 className="mb-2 text-3xl font-bold text-slate-900">
-                    Quick Learn
+                    qckRecall
                   </h2>
                   {/* <p className="text-slate-500">
                     {role === "owner" ? "Owner Portal" : "User Portal"}
