@@ -137,13 +137,6 @@ export default function SubjectPage() {
       return;
     }
 
-    if (!activeSubsectionId) {
-      setActiveSubsectionId(
-        buildSubsectionKey(selectedSection?._id, sectionSubsections[0], 0),
-      );
-      return;
-    }
-
     const activeStillExists = sectionSubsections.some(
       (subsection, index) =>
         (subsection._id || `${selectedSection?._id}-${index}`) ===

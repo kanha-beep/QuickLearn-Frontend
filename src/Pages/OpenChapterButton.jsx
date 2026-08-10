@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 export function OpenChapterButton({ navigate, subject, classId }) {
   return (
     <button
-      className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+      className="inline-flex w-auto items-center justify-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
       onClick={() =>
         navigate(`/${classId}/subjects/${subject._id}/chapters`, {
           state: {
