@@ -60,7 +60,7 @@ export default function Navbar() {
             className="inline-flex items-center gap-2 rounded-lg border border-slate-200 text-black bg-white p-2 text-sm font-semibold shadow-sm transition hover:border-blue-500 hover:text-blue-600"
           >
             <GraduationCap className="h-5 w-5" />
-            <span>FSSA</span>
+            <span>quickRecall</span>
           </button>
           {/* <span className="mt-1 text-xs font-medium text-white">
             Your Learning Companion
