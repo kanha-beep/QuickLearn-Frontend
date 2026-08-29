@@ -1,4 +1,4 @@
-# QuickLearn Frontend
+# qckRecall Frontend
 
 React + Vite client for the study platform.
 
@@ -27,4 +27,4 @@ npm run dev
 ```
 
 Start the Java backend before opening the app. In local development, if no API URL is set, the client falls back to the Vite `/api` proxy which targets `http://localhost:3000`.
-"# quicklearn-java-front" 
+"# qckRecall-java-front" 

@@ -8,7 +8,7 @@ export function MainPageHeading() {
         Smart Study Workspace
       </div> */}
       <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
-        Welcome to quickLearn
+        Welcome to qckRecall
       </h1>
       <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 sm:text-base">
         A focused space to manage classes and keep your learning flow fast,
