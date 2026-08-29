@@ -4,10 +4,9 @@ import { clearAuthSession, getStoredToken } from "./src/auth.js";
 const envBaseURL =
   import.meta.env.VITE_API_URL || import.meta.env.VITE_JAVA_API_URL || "";
 const baseURL = envBaseURL.replace(/\/+$/, "");
-
+console.log("front urls: ", envBaseURL)
 export const api = axios.create({
   baseURL,
-  timeout: 15000,
   withCredentials: true,
 });
 

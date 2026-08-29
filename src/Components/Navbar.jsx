@@ -66,65 +66,65 @@ export default function Navbar() {
             Your Learning Companion
           </span> */}
           <button
-            className="inline-flex items-center gap-2 rounded-lg border border-cyan-200 px-3 py-2 text-sm font-medium text-cyan-700 transition hover:bg-cyan-50 sm:px-4"
+            className="inline-flex items-center gap-2 rounded-lg border border-cyan-200 px-3 py-2 text-sm font-medium text-cyan-700 transition bg-gray-50 hover:bg-blue-100 sm:px-4"
             onClick={() => navigate("/contact")}
           >
             <FaPhoneAlt className="h-4 w-4" />
           </button>
-          {isLoggedIn && (
-            <button
-              className="rounded-lg border border-sky-200 px-3 py-2 text-sm font-medium text-sky-700 transition hover:bg-sky-50 sm:px-4"
-              onClick={() =>
-                window.open(blogUrl, "_blank", "noopener,noreferrer")
-              }
-            >
-              Blog
-            </button>
-          )}
-          {isLoggedIn && (
-            <button
-              className="rounded-lg border border-violet-200 px-3 py-2 text-sm font-medium text-violet-700 transition hover:bg-violet-50 sm:px-4"
-              onClick={() =>
-                window.open(newsUrl, "_blank", "noopener,noreferrer")
-              }
-            >
-              News
-            </button>
+          {isLoggedIn ? (
+            <>
+              <button
+                className="rounded-lg border border-sky-200 px-3 py-2 text-sm font-medium text-sky-700 transition hover:bg-sky-50 sm:px-4"
+                onClick={() =>
+                  window.open(blogUrl, "_blank", "noopener,noreferrer")
+                }
+              >
+                Blog
+              </button>
+              <button
+                className="rounded-lg border border-violet-200 px-3 py-2 text-sm font-medium text-violet-700 transition hover:bg-violet-50 sm:px-4"
+                onClick={() =>
+                  window.open(newsUrl, "_blank", "noopener,noreferrer")
+                }
+              >
+                News
+              </button>
+              <button
+                className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50 sm:px-4"
+                onClick={async () => {
+                  try {
+                    await api.post("/api/auth/logout");
+                  } catch (error) {
+                    console.error(
+                      "Logout request failed:",
+                      error?.response?.data || error,
+                    );
+                  } finally {
+                    clearAuthSession();
+                  }
+
+                  navigate("/auth");
+                }}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="rounded-lg border border-blue-200 px-3 py-2 text-sm font-medium text-blue-700 transition bg-gray-50 hover:bg-blue-100 sm:px-4"
+                onClick={() => navigate("/auth")}
+              >
+                Login
+              </button>
+            </>
           )}
           {isLoggedIn && isAdmin && (
             <button
-              className="rounded-lg border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50 sm:px-4"
+              className="rounded-lg border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition bg-gray-50 hover:bg-blue-100 sm:px-4"
               onClick={() => navigate("/dashboard")}
             >
               Dashboard
-            </button>
-          )}
-          {!isLoggedIn ? (
-            <button
-              className="rounded-lg border border-blue-200 px-3 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-50 sm:px-4"
-              onClick={() => navigate("/auth")}
-            >
-              Login
-            </button>
-          ) : (
-            <button
-              className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50 sm:px-4"
-              onClick={async () => {
-                try {
-                  await api.post("/api/auth/logout");
-                } catch (error) {
-                  console.error(
-                    "Logout request failed:",
-                    error?.response?.data || error,
-                  );
-                } finally {
-                  clearAuthSession();
-                }
-
-                navigate("/auth");
-              }}
-            >
-              Logout
             </button>
           )}
         </div>

@@ -36,15 +36,16 @@ export default function Auth({
       if (!isLogin && formData.password !== formData.confirmPassword) {
         throw new Error("Passwords do not match");
       }
-
-      const res = await api.post(
-        isLogin ? "/api/auth/login" : "/api/auth/register",
-        {
+      const loginPayload = {
           email: formData.email.trim(),
           password: formData.password,
           confirmPassword: formData.confirmPassword,
           name: formData.name.trim(),
-        },
+        }
+      console.log("start login", loginPayload)
+      const res = await api.post(
+        isLogin ? "/api/auth/login" : "/api/auth/register",loginPayload
+        ,
       );
       const role = res?.data?.roles || res?.data?.user?.roles || "";
       storeAuthSession({
