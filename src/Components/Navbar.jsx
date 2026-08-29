@@ -119,28 +119,29 @@ export default function Navbar() {
               </button>
             </>
           )}
-       
         </div>
-        <div className="flex w-full items-center gap-2 md:w-auto md:flex-none md:justify-end">
-             {isLoggedIn && isAdmin && (
-            <button
-              className="rounded-lg border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition bg-gray-50 hover:bg-blue-100 sm:px-4"
-              onClick={() => navigate("/dashboard")}
-            >
-              Dashboard
-            </button>
-          )}
-          {searchEnabled && (
-            <div className="w-[18rem] md:w-[10rem] md:flex-none sm:w-[18rem]">
-              <input
-                type="text"
-                value={searchValue}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder={searchPlaceholder}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100"
-              />
-            </div>
-          )}
+        <div className="flex justify-center">
+          <div className="flex items-center justify-start gap-2 md:w-auto md:flex-none md:justify-end w-[92%]">
+            {isLoggedIn && isAdmin && (
+              <button
+                className="rounded-lg border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition bg-gray-50 hover:bg-blue-100 sm:px-4"
+                onClick={() => navigate("/dashboard")}
+              >
+                Dashboard
+              </button>
+            )}
+            {searchEnabled && (
+              <div className="w-[18rem] md:w-[10rem] md:flex-none sm:w-[18rem]">
+                <input
+                  type="text"
+                  value={searchValue}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  placeholder={searchPlaceholder}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100"
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>
