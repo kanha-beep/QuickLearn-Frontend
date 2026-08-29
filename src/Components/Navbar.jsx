@@ -54,7 +54,7 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-200 bg-gray-800 backdrop-blur">
       <div className="mx-auto flex w-full flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:justify-between ">
-        <div className="flex justify-between lg:w-[35%] md:w-[60%] w-[25rem]">
+        <div className="flex justify-between lg:w-[30%] md:w-[60%] w-[23rem]">
           <button
             onClick={() => navigate("/")}
             className="inline-flex items-center gap-2 rounded-lg border border-slate-200 text-black bg-white p-2 text-sm font-semibold shadow-sm transition hover:border-blue-500 hover:text-blue-600"
@@ -74,7 +74,7 @@ export default function Navbar() {
           {isLoggedIn ? (
             <>
               <button
-                className="rounded-lg border border-sky-200 px-3 py-2 text-sm font-medium text-sky-700 transition hover:bg-sky-50 sm:px-4"
+                className="rounded-lg border border-sky-200 p-1 text-sm font-medium text-sky-700 transition hover:bg-sky-50 sm:px-4"
                 onClick={() =>
                   window.open(blogUrl, "_blank", "noopener,noreferrer")
                 }
@@ -82,7 +82,7 @@ export default function Navbar() {
                 Blog
               </button>
               <button
-                className="rounded-lg border border-violet-200 px-3 py-2 text-sm font-medium text-violet-700 transition hover:bg-violet-50 sm:px-4"
+                className="rounded-lg border border-violet-200 p-1 text-sm font-medium text-violet-700 transition hover:bg-violet-50 sm:px-4"
                 onClick={() =>
                   window.open(newsUrl, "_blank", "noopener,noreferrer")
                 }
@@ -90,7 +90,7 @@ export default function Navbar() {
                 News
               </button>
               <button
-                className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50 sm:px-4"
+                className="rounded-lg border border-rose-200 p-1 text-sm font-medium text-rose-700 transition hover:bg-rose-50 sm:px-4"
                 onClick={async () => {
                   try {
                     await api.post("/api/auth/logout");
