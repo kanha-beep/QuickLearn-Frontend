@@ -76,13 +76,13 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+          <motion.div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
             {filteredClasses.map((cl, index) => (
               <div key={cl._id} className="min-w-0">
                 <ClassHomeCard subject={cl} navigate={navigate} index={index} />
               </div>
             ))}
-          </div>
+          </motion.div>
 
           {filteredClasses.length === 0 && (
             <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
