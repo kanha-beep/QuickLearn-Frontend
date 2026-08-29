@@ -313,7 +313,7 @@ export default function SubjectPage() {
       <div className="mx-auto h-[43rem] w-full max-w-[95%] pt-1 lg:mt-[2rem]  text-slate-900">
         {/* chapters list */}
         <section className={`grid grid-cols-4 items-start gap-2 ${layoutClass} h-[90%]`}>
-          <div className="h-full rounded-2xl border border-slate-200 px-2 py-3 shadow-sm sm:col-span-1 col-span-2 bg-white/80 overflow-auto subject-scrollbar">
+          <div className="h-[20rem] rounded-2xl border border-slate-200 px-2 py-3 shadow-sm sm:col-span-1 col-span-2 bg-white/80 overflow-auto subject-scrollbar">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div className="text-sm font-semibold text-slate-700">
                 Chapters
@@ -391,7 +391,7 @@ export default function SubjectPage() {
             </div>
           </div>
           {/* sections list actual div*/}
-          <div className="h-full rounded-2xl border border-slate-200  px-2 py-3 sm:col-span-1 bg-white/80 col-span-2 shadow-sm overflow-auto subject-scrollbar">
+          <div className="h-[20rem] rounded-2xl border border-slate-200  px-2 py-3 sm:col-span-1 bg-white/80 col-span-2 shadow-sm overflow-auto subject-scrollbar">
             <div className="mb-3 text-sm font-semibold text-slate-700">
               Sections
             </div>
@@ -642,14 +642,14 @@ export default function SubjectPage() {
             </>
           ) : (
             <>
-              <div className="h-full rounded-2xl border border-slate-200 bg-white/80 p-3 col-span-2 shadow-sm sm:col-span-1">
+              <div className="h-[20rem] rounded-2xl border border-slate-200 bg-white/80 p-3 col-span-2 shadow-sm sm:col-span-1">
                 <div className="mb-3 text-sm font-semibold text-slate-700">
                   Subsections
                 </div>
                 <p className="text-sm text-slate-500">Coming soon</p>
               </div>
               {/* got the actual div explanation */}
-              <div className="h-full rounded-2xl border border-slate-200 col-span-2 sm:col-span-1 p-3 shadow-sm overflow-auto subject-scrollbar">
+              <div className="h-[20rem] rounded-2xl border border-slate-200 col-span-2 sm:col-span-1 p-3 shadow-sm overflow-auto subject-scrollbar">
                 <div className="mb-3 text-sm font-semibold text-slate-700">
                   Explanation
                 </div>
