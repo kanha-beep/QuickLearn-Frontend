@@ -53,7 +53,7 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-200 bg-gray-800 backdrop-blur">
-      <div className="mx-auto flex w-full flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:justify-between ">
+      <div className="mx-auto flex w-full items-center flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:justify-between ">
         <div className="flex justify-between lg:w-[30%] md:w-[60%] w-[23rem]">
           <button
             onClick={() => navigate("/")}

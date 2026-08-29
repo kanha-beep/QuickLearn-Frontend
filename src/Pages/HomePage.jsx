@@ -76,7 +76,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <motion.div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" initial={{opacity:0, y:-25}} whileInView={{opacity:1, y:0}}>
+          <motion.div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" initial={{opacity:0, y:25}} whileInView={{opacity:1, y:0}}>
             {filteredClasses.map((cl, index) => (
               <div key={cl._id} className="min-w-0">
                 <ClassHomeCard subject={cl} navigate={navigate} index={index} />
