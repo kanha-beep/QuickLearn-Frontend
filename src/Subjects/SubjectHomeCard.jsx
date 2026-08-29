@@ -10,9 +10,9 @@ export default function SubjectHomeCard({ subject, navigate, classId }) {
   return (
     <div className="py-2">
       <motion.article
-        initial={{ opacity: 0, x: -200 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.65, delay: 0.2, ease: "easeInOut" }}
+        // initial={{ opacity: 0, x: -200 }}
+        // whileInView={{ opacity: 1, x: 0 }}
+        // transition={{ duration: 0.65, delay: 0.2, ease: "easeInOut" }}
       >
         <div className="h-full rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition hover:-translate-y-1">
           <div className="mb-3">
