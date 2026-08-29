@@ -399,7 +399,7 @@ export default function SubjectPage() {
             key={`${activeChapterId}-${visibleSections.length}`}
             initial={{opacity:0, y:50}}
             animate={{opacity:1, y:0}}
-            transition={{duration:0.65, delay:0.1, ease:"easeInOut"}}
+            transition={{duration:0.2, delay:0.1, ease:"easeInOut"}}
             >
 
             
