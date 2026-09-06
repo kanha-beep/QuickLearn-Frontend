@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { api } from "../../api.js";
@@ -15,9 +15,11 @@ import SafeRichContent, {
   hasSafeRenderableContent,
 } from "../Components/SafeRichContent.jsx";
 
+// Creates a stable key for a subsection, using its ID when one is available.
 const buildSubsectionKey = (sectionId, subsection, index) =>
   subsection?._id || `${sectionId}-${index}`;
 
+// Converts saved subsection content into text that can be shown in a textarea.
 const toTextareaValue = (content = []) => {
   if (Array.isArray(content)) {
     return content
@@ -29,12 +31,14 @@ const toTextareaValue = (content = []) => {
   return String(content || "");
 };
 
+// Splits textarea text into a clean array of non-empty content lines.
 const toContentArray = (content = "") =>
   String(content)
     .split("\n")
     .map((item) => item.trim())
     .filter(Boolean);
 
+// Normalizes content into an array of non-empty text items for rendering.
 const getContentItems = (content = []) => {
   if (Array.isArray(content)) {
     return content.map((item) => String(item).trim()).filter(Boolean);
@@ -46,19 +50,26 @@ const getContentItems = (content = []) => {
     .filter(Boolean);
 };
 
+// Checks whether content contains anything safe that can be displayed.
 const hasRenderedContent = (content = []) => hasSafeRenderableContent(content);
 
+// Displays a subject's chapters, sections, subsections, and their content.
 export default function SubjectPage() {
   const navigate = useNavigate();
   const { subjectId, classId } = useParams();
   const [searchParams] = useSearchParams();
+  // Stores the ID of the chapter currently selected by the user.
   const [activeChapterId, setActiveChapterId] = useState("");
-  const [editableChapters, setEditableChapters] = useState([]);
+    // Stores the ID of the section currently selected by the user.
   const [activeSectionId, setActiveSectionId] = useState("");
+    // Stores the ID of the subsection currently selected by the user.
   const [activeSubsectionId, setActiveSubsectionId] = useState("");
-  const [editableSections, setEditableSections] = useState([]);
-  const [deletedSectionIds, setDeletedSectionIds] = useState([]);
+    // Stores the ID of the subsection currently open in the editor.
   const [editingSubsectionId, setEditingSubsectionId] = useState("");
+  // Stores the chapter list so it can be updated locally after changes.
+  const [editableChapters, setEditableChapters] = useState([]);
+  // Stores the section list so it can be updated locally after changes.
+  const [allSections, setAllSections] = useState([]);
   const [subsectionDraft, setSubsectionDraft] = useState({
     subsection_name: "",
     subsection_content: "",
@@ -72,95 +83,89 @@ export default function SubjectPage() {
   const userRole = storedUser ? JSON.parse(storedUser)?.roles : "";
   const isAdmin = storedRole === "admin" || userRole === "admin";
   const query = (searchParams.get("q") || "").trim().toLowerCase();
-
+  //load all chapters list in editable chapters list
   useEffect(() => {
     setEditableChapters(chaptersList);
   }, [chaptersList]);
-
-  const filteredChapters = editableChapters.filter((chapter) =>
+  // searched chapters
+  const searchedChapters = editableChapters.filter((chapter) =>
     chapter?.chapter_name?.toLowerCase().includes(query),
   );
 
   useEffect(() => {
-    if (!filteredChapters.length) {
+    if (!searchedChapters.length) {
       setActiveChapterId("");
       return;
     }
-
-    const activeStillExists = filteredChapters.some(
+    // chapter opne h, ab jo search kiya, kya vo chapters me mera chapter he
+    const activeChapterInSearchedChapters = searchedChapters.some(
       (chapter) => chapter._id === activeChapterId,
     );
 
-    if (activeChapterId && !activeStillExists) {
+    if (activeChapterId && !activeChapterInSearchedChapters) {
       setActiveChapterId("");
     }
-  }, [filteredChapters, activeChapterId]);
-
+  }, [searchedChapters, activeChapterId]);
+  // all sections load kro and editable section me insert krdo
   const sections = useSections(subjectId, activeChapterId);
   useEffect(() => {
-    setEditableSections(sections);
+    setAllSections(sections);
   }, [sections]);
 
-  const visibleSections = useMemo(
-    () =>
-      editableSections.filter(
-        (section) => !deletedSectionIds.includes(section._id),
-      ),
-    [editableSections, deletedSectionIds],
-  );
-
   useEffect(() => {
-    if (!visibleSections.length) {
+    if (!allSections.length) {
       setActiveSectionId("");
       setActiveSubsectionId("");
       return;
     }
 
-    const activeStillExists = visibleSections.some(
+    const activeChapterInSearchedChapters = allSections.some(
       (section) => section._id === activeSectionId,
     );
 
-    if (activeSectionId && !activeStillExists) {
+    if (activeSectionId && !activeChapterInSearchedChapters) {
       setActiveSectionId("");
       setActiveSubsectionId("");
     }
-  }, [visibleSections, activeSectionId]);
-
-  const selectedSection =
-    visibleSections.find((section) => section._id === activeSectionId) || null;
-  const sectionSubsections = selectedSection?.subsections || [];
+  }, [allSections, activeSectionId]);
+  // get the single section object of the selected section
+  const selectedSectionObject =
+    allSections.find((section) => section._id === activeSectionId) || null;
+  const allSectionSubsections = selectedSectionObject?.subsections || [];
 
   useEffect(() => {
-    if (!sectionSubsections.length) {
+    // if new sections has zero sub sections, than empty other things
+    if (!allSectionSubsections.length) {
       setActiveSubsectionId("");
       setEditingSubsectionId("");
       return;
     }
-
-    const activeStillExists = sectionSubsections.some(
+    // returns boolean value to know if this sub-section is now also opened or not
+    const activeSubsectionExists = allSectionSubsections.some(
       (subsection, index) =>
-        (subsection._id || `${selectedSection?._id}-${index}`) ===
+        (subsection._id || `${selectedSectionObject?._id}-${index}`) ===
         activeSubsectionId,
     );
 
-    if (activeSubsectionId && !activeStillExists) {
+    if (activeSubsectionId && !activeSubsectionExists) {
       setActiveSubsectionId("");
       setEditingSubsectionId("");
     }
-  }, [sectionSubsections, activeSubsectionId, selectedSection]);
+  }, [allSectionSubsections, activeSubsectionId, selectedSectionObject]);
 
+  // Finds the subsection whose ID matches the currently active subsection.
   const selectedSubsection =
-    sectionSubsections.find(
+    allSectionSubsections.find(
       (subsection, index) =>
-        (subsection._id || `${selectedSection?._id}-${index}`) ===
+        (subsection._id || `${selectedSectionObject?._id}-${index}`) ===
         activeSubsectionId,
     ) || null;
-  const hasSubsections = sectionSubsections.length > 0;
   const layoutClass = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
   const actionRowClass = "mt-2 flex flex-wrap items-center gap-2";
 
+  // Deletes a section and removes it from the sections currently shown on the page.
   const handleDeleteSection = async (sectionId) => {
-    const section = visibleSections.find((item) => item._id === sectionId);
+    const section = allSections.find((item) => item._id === sectionId);
     if (!sectionId || !section?.chapter_of_section) return;
 
     await DeleteSection(
@@ -168,12 +173,11 @@ export default function SubjectPage() {
       subjectId,
       section.chapter_of_section,
       sectionId,
-      (prevSections = []) =>
-        prevSections.filter((item) => item._id !== sectionId),
+      setAllSections,
     );
-    setDeletedSectionIds((prev) => [...prev, sectionId]);
   };
 
+  // Removes a deleted chapter from local state and clears its active selection.
   const handleDeleteChapter = (chapterId) => {
     setEditableChapters((prevChapters) =>
       prevChapters.filter((chapter) => chapter._id !== chapterId),
@@ -185,11 +189,12 @@ export default function SubjectPage() {
     }
   };
 
+  // Opens the subsection editor and fills it with the selected subsection's data.
   const startEditSubsection = (subsection, index) => {
-    if (!selectedSection) return;
+    if (!selectedSectionObject) return;
 
     const subsectionKey = buildSubsectionKey(
-      selectedSection._id,
+      selectedSectionObject._id,
       subsection,
       index,
     );
@@ -202,6 +207,7 @@ export default function SubjectPage() {
     });
   };
 
+  // Closes the subsection editor and clears the draft values.
   const resetSubsectionEditor = () => {
     setEditingSubsectionId("");
     setSubsectionDraft({
@@ -211,24 +217,25 @@ export default function SubjectPage() {
     });
   };
 
+  // Saves the complete subsection list for the active section to the server.
   const saveSubsectionsForSection = async (updatedSubsections) => {
-    if (!selectedSection || !activeChapterId) return false;
+    if (!selectedSectionObject || !activeChapterId) return false;
 
     setIsSavingSubsection(true);
     try {
       await api.patch(
-        `/api/subjects/${subjectId}/chapters/${activeChapterId}/sections/${selectedSection._id}/edit`,
+        `/api/subjects/${subjectId}/chapters/${activeChapterId}/sections/${selectedSectionObject._id}/edit`,
         {
-          sectionName: selectedSection.section_name,
-          sectionContent: selectedSection.section_content,
-          order: selectedSection.order,
+          sectionName: selectedSectionObject.section_name,
+          sectionContent: selectedSectionObject.section_content,
+          order: selectedSectionObject.order,
           subsections: updatedSubsections,
         },
       );
 
-      setEditableSections((prevSections) =>
+      setAllSections((prevSections) =>
         prevSections.map((section) =>
-          section._id === selectedSection._id
+          section._id === selectedSectionObject._id
             ? { ...section, subsections: updatedSubsections }
             : section,
         ),
@@ -245,12 +252,13 @@ export default function SubjectPage() {
     }
   };
 
+  // Applies the edited draft to one subsection and saves the updated list.
   const handleSaveSubsection = async () => {
-    if (!selectedSection || !editingSubsectionId) return;
+    if (!selectedSectionObject || !editingSubsectionId) return;
 
-    const updatedSubsections = sectionSubsections.map((subsection, index) => {
+    const updatedSubsections = allSectionSubsections.map((subsection, index) => {
       const subsectionKey = buildSubsectionKey(
-        selectedSection._id,
+        selectedSectionObject._id,
         subsection,
         index,
       );
@@ -272,13 +280,14 @@ export default function SubjectPage() {
     }
   };
 
+  // Removes one subsection, saves the remaining list, and clears related selection state.
   const handleDeleteSubsection = async (subsectionKeyToDelete) => {
-    if (!selectedSection) return;
+    if (!selectedSectionObject) return;
 
-    const updatedSubsections = sectionSubsections.filter(
+    const updatedSubsections = allSectionSubsections.filter(
       (subsection, index) => {
         const subsectionKey = buildSubsectionKey(
-          selectedSection._id,
+          selectedSectionObject._id,
           subsection,
           index,
         );
@@ -330,7 +339,7 @@ export default function SubjectPage() {
             </div>
 
             <div className="space-y-2 overflow-auto pr-1 lg:pr-0">
-              {filteredChapters.map((chapter) => {
+              {searchedChapters.map((chapter) => {
                 const isActive = activeChapterId === chapter._id;
                 return (
                   <div
@@ -346,14 +355,17 @@ export default function SubjectPage() {
                       onClick={() => {
                         if (activeChapterId === chapter._id) {
                           setActiveChapterId("");
+                          setAllSections([]);
                           setActiveSectionId("");
                           setActiveSubsectionId("");
+                          setEditingSubsectionId("");
                           return;
                         }
-
+                        setAllSections([])
                         setActiveChapterId(chapter._id);
                         setActiveSectionId("");
                         setActiveSubsectionId("");
+                        setEditingSubsectionId("")
                       }}
                       className="w-full break-words text-left text-base font-semibold text-slate-800"
                     >
@@ -396,7 +408,7 @@ export default function SubjectPage() {
               Sections
             </div>
             <motion.div
-            key={`${activeChapterId}-${visibleSections.length}`}
+            key={`${activeChapterId}-${allSections.length}`}
             initial={{opacity:0, y:50}}
             animate={{opacity:1, y:0}}
             transition={{duration:0.2, delay:0.1, ease:"easeInOut"}}
@@ -404,7 +416,7 @@ export default function SubjectPage() {
 
             
             <div className="space-y-2 overflow-y-auto pr-1 lg:pr-0">
-              {visibleSections.map((section) => {
+              {allSections.map((section) => {
                 const isActive = activeSectionId === section._id;
                 return (
                   <div
@@ -412,11 +424,12 @@ export default function SubjectPage() {
                       if (activeSectionId === section._id) {
                         setActiveSectionId("");
                         setActiveSubsectionId("");
+                        setEditingSubsectionId("")
                         return;
                       }
-
                       setActiveSectionId(section._id);
                       setActiveSubsectionId("");
+                      setEditingSubsectionId("")
                     }}
                     key={section._id}
                     className={`rounded-xl border p-2 transition-color ${
@@ -474,7 +487,7 @@ export default function SubjectPage() {
             </motion.div>
           </div>
 
-          {selectedSection && hasSubsections ? (
+          {selectedSectionObject && allSectionSubsections.length > 0 ? (
             <>
             {/* actual div subsections */}
               <div className="rounded-2xl border border-slate-200 bg-white/80 px-2 py-3 sm:col-span-1 col-span-2 shadow-sm h-full overflow-auto subject-scrollbar">
@@ -482,9 +495,9 @@ export default function SubjectPage() {
                   Subsections
                 </div>
                 <div className="h-full space-y-2 pr-1 lg:pr-0">
-                  {sectionSubsections.map((subsection, index) => {
+                  {allSectionSubsections.map((subsection, index) => {
                     const subsectionKey = buildSubsectionKey(
-                      selectedSection._id,
+                      selectedSectionObject._id,
                       subsection,
                       index,
                     );
@@ -630,9 +643,9 @@ export default function SubjectPage() {
                     content={selectedSubsection.subsection_content}
                     className="prose prose-sm max-w-none text-sm text-slate-700"
                   />
-                ) : hasRenderedContent(selectedSection.section_content) ? (
+                ) : hasRenderedContent(selectedSectionObject.section_content) ? (
                   <SafeRichContent
-                    content={selectedSection.section_content}
+                    content={selectedSectionObject.section_content}
                     className="prose prose-sm max-w-none text-sm text-slate-700"
                   />
                 ) : (
@@ -653,10 +666,10 @@ export default function SubjectPage() {
                 <div className="mb-3 text-sm font-semibold text-slate-700">
                   Explanation
                 </div>
-                {selectedSection ? (
-                  hasRenderedContent(selectedSection.section_content) ? (
+                {selectedSectionObject ? (
+                  hasRenderedContent(selectedSectionObject.section_content) ? (
                     <SafeRichContent
-                      content={selectedSection.section_content}
+                      content={selectedSectionObject.section_content}
                       className="prose prose-sm max-w-none text-sm text-slate-700"
                     />
                   ) : (

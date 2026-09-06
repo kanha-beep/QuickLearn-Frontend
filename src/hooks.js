@@ -52,6 +52,7 @@ export const useSections = (subjectId, chapterId) => {
             setSections([]);
             return;
         }
+        setSections([]);
         resGetSection(subjectId, chapterId)
             .then((data) => setSections(data || []))
             .catch(() => setSections([]))
