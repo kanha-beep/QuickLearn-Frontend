@@ -4,7 +4,7 @@ React + Vite client for the study platform.
 
 ## API Target
 
-The frontend is intended to call the dedicated Java backend in `../java-server`.
+The frontend is intended to call the MongoDB backend in `../server`.
 
 Set:
 
@@ -26,5 +26,5 @@ npm install
 npm run dev
 ```
 
-Start the Java backend before opening the app. In local development, if no API URL is set, the client falls back to the Vite `/api` proxy which targets `http://localhost:3000`.
+Start the MongoDB backend before opening the app. In local development, if no API URL is set, the client falls back to the Vite `/api` proxy which targets `http://localhost:3000`.
 "# qckRecall-java-front" 

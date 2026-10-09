@@ -1,12 +1,12 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { motion } from "motion/react";
+import GoogleSignIn from "../Components/GoogleSignIn.jsx";
 import { api } from "../../api.js";
 import { WrapAsync } from "../Utils/WrapAsync.js";
 import { storeAuthSession } from "../auth.js";
 
 export default function Auth({
-  userRoles,
+
   setUserRoles,
   setIsLoggedIn,
   msg,
@@ -26,6 +26,24 @@ export default function Auth({
   const [isLogin, setIsLogin] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const handleGoogleAuth = async (credential) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setMsg("");
+    try {
+      const { data } = await api.post("/api/auth/google", { credential });
+      const roles = data.roles || data.user?.roles || "";
+      storeAuthSession({ token: data.token, user: data.user, roles });
+      setUserRoles(roles);
+      setIsLoggedIn(true);
+      navigate("/");
+    } catch (error) {
+      setMsg(error?.response?.data?.msg || "Google sign-in failed. Please try again.");
+      setMsgType("danger");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
@@ -42,7 +60,7 @@ export default function Auth({
           confirmPassword: formData.confirmPassword,
           name: formData.name.trim(),
         }
-      console.log("start login", loginPayload)
+
       const res = await api.post(
         isLogin ? "/api/auth/login" : "/api/auth/register",loginPayload
         ,
@@ -77,9 +95,15 @@ export default function Auth({
   const submitAuth = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
-
     setIsSubmitting(true);
-
+    if (
+  formData.password.length < 6
+  // !/[A-Z]/.test(formData.password) ||
+  // !/[a-z]/.test(formData.password) ||
+  // !/[0-9]/.test(formData.password)
+) {
+  return;
+}
     try {
       if (role === "owner") {
         await handleOwnerAuth();
@@ -97,7 +121,7 @@ export default function Auth({
   };
 
   return (
-    <div className="flex h-[44rem] items-center px-3 py-4 justify-center">
+    <div className="flex min-h-[44rem] items-center px-3 py-4 justify-center">
       <div className="mx-auto w-full max-w-6xl">
         <div className="flex justify-center">
           <div className="w-full max-w-lg">
@@ -156,6 +180,7 @@ export default function Auth({
                   </button>
                 </div>
 
+                {role !== "owner" && <GoogleSignIn disabled={isSubmitting} onCredential={handleGoogleAuth} />}
                 <form onSubmit={submitAuth}>
                   <div className="mb-3">
                     <label className="mb-2 block text-sm font-semibold text-slate-700">
@@ -184,7 +209,10 @@ export default function Auth({
                       value={formData.password}
                       onChange={handleChange}
                       required
+                      minLength={6}
+                      
                     />
+                    <span className="text-[0.8rem] font-semibold ml-2 text-gray-400">Must be of minimum 6 letters</span>
                   </div>
 
                   {!isLogin && (

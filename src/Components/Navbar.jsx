@@ -14,7 +14,7 @@ export default function Navbar() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const blogUrl = "https://blogs-frontend-omega.vercel.app/";
-  const newsUrl = "https://news-frontend-plum.vercel.app/";
+  const newsUrl = "https://thenewspoll.com/";
   const token = getStoredToken();
   const roles = getStoredRole();
   const user = getStoredUser();
@@ -74,7 +74,7 @@ export default function Navbar() {
           {isLoggedIn ? (
             <>
               <button
-                className="rounded-lg border border-sky-200 p-1 text-sm font-medium text-sky-700 transition hover:bg-sky-50 sm:px-4"
+                className="rounded-lg border border-sky-200 bg-slate-100 p-1 text-sm font-medium text-sky-700 transition hover:bg-slate-300 sm:px-4"
                 onClick={() =>
                   window.open(blogUrl, "_blank", "noopener,noreferrer")
                 }
@@ -82,7 +82,7 @@ export default function Navbar() {
                 Blog
               </button>
               <button
-                className="rounded-lg border border-violet-200 p-1 text-sm font-medium text-violet-700 transition hover:bg-violet-50 sm:px-4"
+                className="rounded-lg border border-violet-200 bg-slate-100 p-1 text-sm font-medium text-violet-700 transition hover:bg-slate-300 sm:px-4"
                 onClick={() =>
                   window.open(newsUrl, "_blank", "noopener,noreferrer")
                 }
@@ -90,7 +90,7 @@ export default function Navbar() {
                 News
               </button>
               <button
-                className="rounded-lg border border-rose-200 p-1 text-sm font-medium text-rose-700 transition hover:bg-rose-50 sm:px-4"
+                className="rounded-lg border border-rose-200 p-1 bg-slate-100 text-sm font-medium text-rose-700 transition hover:bg-slate-300 sm:px-4"
                 onClick={async () => {
                   try {
                     await api.post("/api/auth/logout");

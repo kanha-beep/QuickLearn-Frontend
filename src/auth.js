@@ -4,10 +4,7 @@ const ROLE_KEY = "roles";
 
 export const getStoredToken = () => {
   const token = localStorage.getItem(TOKEN_KEY);
-  if (!token || token === "undefined" || token === "null") {
-    return "";
-  }
-
+  if (!token || token === "undefined" || token === "null")  return "";
   return token;
 };
 

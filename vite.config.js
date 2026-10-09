@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api/": {
+        // The MongoDB backend lives in ../server and uses the primary API port.
         target: "http://localhost:3000",
         changeOrigin: true,
       },
