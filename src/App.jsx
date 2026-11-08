@@ -1,28 +1,52 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import Navbar from "./Components/Navbar";
 import HomePage from "./Pages/HomePage.jsx";
-import SubjectPage from "./Subjects/SubjectPage.jsx";
-import { Routes, Route, Navigate } from "react-router-dom";
-import AddChapters from "./Chapters/AddChapters.jsx";
-import AddSections from "./Sections/AddSections.jsx";
-import EditSections from "./Sections/EditSections.jsx";
-import EditChapters from "./Chapters/EditChapters.jsx";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import ProtectedRoute from "./Pages/ProtectedRoute.jsx";
 import AdminRoute from "./Pages/AdminRoute.jsx";
-import Auth from "./Pages/Auth.jsx";
-import SingleClassPage from "./Pages/SingleClassPage.jsx";
-import AddClass from "./Class/AddClass.jsx";
-import AddSubject from "./Subjects/AddSubject.jsx";
-import DashboardPage from "./Pages/DashboardPage.jsx";
-import ContactPage from "./Pages/ContactPage.jsx";
 import { api } from "../api.js";
 import { clearAuthSession, getStoredRole, getStoredToken, storeAuthSession } from "./auth.js";
+import WelcomeModal from "./Components/WelcomeModal.jsx";
+import {
+  getSubjectsForClass,
+  prefetchChapters,
+  prefetchClasses,
+} from "./data/classCache.js";
+
+const SubjectPage = lazy(() => import("./Subjects/SubjectPage.jsx"));
+const AddChapters = lazy(() => import("./Chapters/AddChapters.jsx"));
+const AddSections = lazy(() => import("./Sections/AddSections.jsx"));
+const EditSections = lazy(() => import("./Sections/EditSections.jsx"));
+const EditChapters = lazy(() => import("./Chapters/EditChapters.jsx"));
+const Auth = lazy(() => import("./Pages/Auth.jsx"));
+const SingleClassPage = lazy(() => import("./Pages/SingleClassPage.jsx"));
+const AddClass = lazy(() => import("./Class/AddClass.jsx"));
+const AddSubject = lazy(() => import("./Subjects/AddSubject.jsx"));
+const DashboardPage = lazy(() => import("./Pages/DashboardPage.jsx"));
+const ContactPage = lazy(() => import("./Pages/ContactPage.jsx"));
+const WELCOME_PREFERENCES_KEY = "qckRecall-welcome-preferences";
+
+const hasCompletedWelcome = () => {
+  try {
+    return Boolean(localStorage.getItem(WELCOME_PREFERENCES_KEY));
+  } catch {
+    return false;
+  }
+};
+
 function App() {
+  const navigate = useNavigate();
   const [userRoles, setUserRoles] = useState("");
   const [currentView, setCurrentView] = useState("home");
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const hasStoredSession = Boolean(getStoredToken() || getStoredRole());
+  const [isCheckingAuth, setIsCheckingAuth] = useState(() => hasStoredSession);
+  const [showWelcome, setShowWelcome] = useState(() => !hasCompletedWelcome());
+  const [welcomeClasses, setWelcomeClasses] = useState([]);
+  const [selectedWelcomeClassId, setSelectedWelcomeClassId] = useState("");
+  const [welcomeSubjects, setWelcomeSubjects] = useState([]);
+  const [favoriteSubjectIds, setFavoriteSubjectIds] = useState([]);
   const [msg, setMsg] = useState("");
   const [msgType, setMsgType] = useState("success");
 
@@ -37,6 +61,12 @@ function App() {
   };
 
   useEffect(() => {
+    // Start both requests immediately. The class request is public and shared
+    // with HomePage, so this does not create a duplicate call.
+    prefetchClasses().then((loadedClasses) => {
+      setWelcomeClasses(loadedClasses || []);
+    });
+
     const bootstrapAuth = async () => {
       try {
         const res = await api.get("/api/auth/me");
@@ -59,13 +89,62 @@ function App() {
     bootstrapAuth();
   }, []);
 
-  const hasValidToken = Boolean(getStoredToken() || getStoredRole());
+  const handleWelcomeClassChange = (classId) => {
+    setSelectedWelcomeClassId(classId);
+    setFavoriteSubjectIds([]);
+    setWelcomeSubjects([]);
+    getSubjectsForClass(classId).then(setWelcomeSubjects).catch(() => setWelcomeSubjects([]));
+  };
+
+  const handleFavoriteSubjectToggle = (subjectId) => {
+    setFavoriteSubjectIds((currentSubjectIds) => {
+      const isSelected = currentSubjectIds.includes(subjectId);
+      if (!isSelected) prefetchChapters(subjectId);
+      return isSelected
+        ? currentSubjectIds.filter((id) => id !== subjectId)
+        : [...currentSubjectIds, subjectId];
+    });
+  };
+
+  const handleWelcomeContinue = () => {
+    try {
+      localStorage.setItem(
+        WELCOME_PREFERENCES_KEY,
+        JSON.stringify({
+          classId: selectedWelcomeClassId,
+          favoriteSubjectIds,
+        }),
+      );
+    } catch {
+      // If browser storage is unavailable, the welcome flow still works.
+    }
+    setShowWelcome(false);
+  };
+
+  const hasValidToken = hasStoredSession;
   const fallbackPath = hasValidToken ? "/" : "/auth";
 
   return (
     <div className="min-h-screen w-full bg-white">
       <Navbar onHomeClick={handleBackToHome} />
-      <Routes>
+      {showWelcome && (
+        <WelcomeModal
+          isPreparing={isCheckingAuth}
+          classes={welcomeClasses}
+          selectedClassId={selectedWelcomeClassId}
+          subjects={welcomeSubjects}
+          favoriteSubjectIds={favoriteSubjectIds}
+          onClassChange={handleWelcomeClassChange}
+          onFavoriteSubjectToggle={handleFavoriteSubjectToggle}
+          onCancel={() => {
+            setShowWelcome(false);
+            navigate("/auth");
+          }}
+          onClose={handleWelcomeContinue}
+        />
+      )}
+      <Suspense fallback={null}>
+        <Routes>
         <Route
           path="/auth"
           element={
@@ -81,6 +160,30 @@ function App() {
           }
         />
         <Route path="/contact" element={<ContactPage />} />
+        <Route
+          path="/"
+          element={<HomePage onSubjectClick={handleSubjectClick} />}
+        />
+        <Route
+          path="/:classId"
+          element={<SingleClassPage onSubjectClick={handleSubjectClick} />}
+        />
+        <Route
+          path="/:classId/subjects/:subjectId/chapters"
+          element={<SubjectPage />}
+        />
+        <Route
+          path="/subjects/:subjectId/chapters/:chapterId"
+          element={<SubjectPage />}
+        />
+        <Route
+          path="/subjects/:subjectId/chapters/:chapterId/sections"
+          element={<SubjectPage />}
+        />
+        <Route
+          path="/subjects/:subjectId/chapters/:chapterId/sections/:sectionId"
+          element={<SubjectPage />}
+        />
 
         <Route
           path="/*"
@@ -88,12 +191,9 @@ function App() {
             <ProtectedRoute
               isAuthenticated={isLoggedIn}
               isCheckingAuth={isCheckingAuth}
+              loadingFallback={<HomePage />}
             >
               <Routes>
-                <Route
-                  path="/"
-                  element={<HomePage onSubjectClick={handleSubjectClick} />}
-                />
                 <Route
                   path="/dashboard"
                   element={<DashboardPage userRoles={userRoles} />}
@@ -108,12 +208,6 @@ function App() {
                     >
                       <AddClass onSubjectClick={handleSubjectClick} />
                     </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/:classId"
-                  element={
-                    <SingleClassPage onSubjectClick={handleSubjectClick} />
                   }
                 />
                 <Route
@@ -153,23 +247,6 @@ function App() {
                   }
                 />
                 <Route
-                  path="/:classId/subjects/:subjectId/chapters"
-                  element={<SubjectPage />}
-                />
-                <Route
-                  path="/subjects/:subjectId/chapters/:chapterId"
-                  element={<SubjectPage />}
-                />
-                <Route
-                  path="/subjects/:subjectId/chapters/:chapterId/sections"
-                  element={<SubjectPage />}
-                />
-                <Route
-                  path="/subjects/:subjectId/chapters/:chapterId/sections/:sectionId"
-                  element={<SubjectPage />}
-                />
-
-                <Route
                   path="/:classId/subjects/:subjectId/chapters/:chapterId/sections/:sectionId/edit"
                   element={
                     <AdminRoute
@@ -199,7 +276,8 @@ function App() {
           }
         />
         <Route path="*" element={<Navigate to={fallbackPath} replace />} />
-      </Routes>
+        </Routes>
+      </Suspense>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
+import { prefetchSubjects } from "../data/classCache.js";
 
 export default function ClassHomeCard({ subject, navigate, index = 0 }) {
   const hue = index % 3;
@@ -27,6 +28,8 @@ export default function ClassHomeCard({ subject, navigate, index = 0 }) {
         <div>
           <button
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition group-hover:border-emerald-300 group-hover:bg-emerald-50 group-hover:text-emerald-700"
+            onMouseEnter={() => prefetchSubjects(subject?._id)}
+            onFocus={() => prefetchSubjects(subject?._id)}
             onClick={() => navigate(`/${subject._id}`, { state: subject?._id })}
           >
             Open Subjects

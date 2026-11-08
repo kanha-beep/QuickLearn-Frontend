@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { api } from "../../api.js";
 import ClassHomeCard from "../Pages/ClassHomeCard.jsx";
-import { Loading } from "../Components/Loading.jsx";
 import { MainPageHeading } from "../Pages/MainPageHeading.jsx";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import ClassGridSkeleton from "./ClassGridSkeleton.jsx";
+import { getClasses } from "../data/classCache.js";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -13,11 +13,13 @@ export default function HomePage() {
   const [classes, setClasses] = useState([]);
   const [error, setError] = useState("");
   useEffect(() => {
+    let isCurrent = true;
     const getAllClasses = async () => {
       try {
-        const res = await api.get("/api/class");
-        setClasses(res?.data?.getAllClasses || []);
+        const cachedClasses = await getClasses();
+        if (isCurrent) setClasses(cachedClasses);
       } catch (error) {
+        if (!isCurrent) return;
         console.error(
           "Failed to load classes:",
           error?.response?.data?.name || error,
@@ -25,13 +27,14 @@ export default function HomePage() {
         setError(error?.response?.data?.name || "RUko");
         setClasses([]);
       } finally {
-        setLoading(false);
+        if (isCurrent) setLoading(false);
       }
     };
     getAllClasses();
+    return () => {
+      isCurrent = false;
+    };
   }, []);
-
-  if (loading) return <Loading loading={loading} />;
 
   const normalizedQuery = (searchParams.get("q") || "").trim().toLowerCase();
   const filteredClasses = classes.filter((cl) => {
@@ -71,20 +74,25 @@ export default function HomePage() {
 
           <div className="mt-6 flex items-center justify-between">
             <p className="text-sm font-medium text-slate-600">
-              {filteredClasses.length} class
-              {filteredClasses.length !== 1 ? "es" : ""}
+              {loading
+                ? "Connecting to your study space…"
+                : `${filteredClasses.length} class${filteredClasses.length !== 1 ? "es" : ""}`}
             </p>
           </div>
 
-          <motion.div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" initial={{opacity:0, y:25}} whileInView={{opacity:1, y:0}}>
-            {filteredClasses.map((cl, index) => (
-              <div key={cl._id} className="min-w-0">
-                <ClassHomeCard subject={cl} navigate={navigate} index={index} />
-              </div>
-            ))}
-          </motion.div>
+          {loading ? (
+            <ClassGridSkeleton />
+          ) : (
+            <motion.div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" initial={{opacity:0, y:25}} whileInView={{opacity:1, y:0}}>
+              {filteredClasses.map((cl, index) => (
+                <div key={cl._id} className="min-w-0">
+                  <ClassHomeCard subject={cl} navigate={navigate} index={index} />
+                </div>
+              ))}
+            </motion.div>
+          )}
 
-          {filteredClasses.length === 0 && (
+          {!loading && filteredClasses.length === 0 && (
             <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
               <h3 className="text-lg font-semibold text-slate-800">
                 No class found

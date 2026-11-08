@@ -3,9 +3,14 @@ import { Navigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { Loading } from "../Components/Loading.jsx";
 
-export default function ProtectedRoute({ children, isAuthenticated, isCheckingAuth }) {
+export default function ProtectedRoute({
+  children,
+  isAuthenticated,
+  isCheckingAuth,
+  loadingFallback,
+}) {
   if (isCheckingAuth) {
-    return <Loading loading />;
+    return loadingFallback || <Loading loading />;
   }
 
   if (!isAuthenticated) return <Navigate to="/auth" replace />;

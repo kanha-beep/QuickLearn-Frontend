@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../api.js";
 import { getNextOrderValue } from "../Components/order.js";
+import { invalidateClasses } from "../data/classCache.js";
 
 export default function AddClass() {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ export default function AddClass() {
     e.preventDefault();
     try {
       await api.post(`/api/class/add-class`, { classes, order });
+      invalidateClasses();
       setClasses("");
       setOrder(getNextOrderValue(existingClasses));
       return navigate("/");

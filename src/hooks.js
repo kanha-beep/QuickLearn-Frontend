@@ -5,17 +5,22 @@ import { resAddChapter, resAddSection, resAddSubject, resDeleteChapter, resDelet
 export const useSubjects = (classId) => {
     const [subjects, setSubjects] = useState([]);
     useEffect(() => {
+        let isCurrent = true;
         if (!classId) {
             setSubjects([]);
-            return;
+            return () => { isCurrent = false; };
         }
 
         resGetSubjects(classId)
-            .then((data) => setSubjects(data || []))
+            .then((data) => {
+                if (isCurrent) setSubjects(data || []);
+            })
             .catch((e) => {
+                if (!isCurrent) return;
                 console.log("all subjects error: ", e?.response?.data?.msg || e?.message);
                 setSubjects([]);
             });
+        return () => { isCurrent = false; };
     }, [classId])
     return subjects;
 }
@@ -28,16 +33,21 @@ export const useAddSubject = () => {
 export const useChapters = (subjectId) => {
     const [chapters, setChapters] = useState(null)
     useEffect(() => {
+        let isCurrent = true;
         if (!subjectId) {
             setChapters(null);
-            return;
+            return () => { isCurrent = false; };
         }
         resGetChapters(subjectId)
-            .then(setChapters)
+            .then((data) => {
+                if (isCurrent) setChapters(data);
+            })
             .catch(e => {
+                if (!isCurrent) return;
                 console.log(e)
                 setChapters({ chaptersList: [], chapterCount: 0, subjectName: "" })
             })
+        return () => { isCurrent = false; };
     }, [subjectId])
     return {
         chaptersList: chapters?.chaptersList || [],
@@ -48,14 +58,20 @@ export const useChapters = (subjectId) => {
 export const useSections = (subjectId, chapterId) => {
     const [sections, setSections] = useState([])
     useEffect(() => {
+        let isCurrent = true;
         if (!subjectId || !chapterId) {
             setSections([]);
-            return;
+            return () => { isCurrent = false; };
         }
         setSections([]);
         resGetSection(subjectId, chapterId)
-            .then((data) => setSections(data || []))
-            .catch(() => setSections([]))
+            .then((data) => {
+                if (isCurrent) setSections(data || []);
+            })
+            .catch(() => {
+                if (isCurrent) setSections([]);
+            })
+        return () => { isCurrent = false; };
     }, [subjectId, chapterId])
     console.log("sections in hook: ", sections)
     return sections
